@@ -13,6 +13,10 @@ class BreathingApp {
         this.sessionStartTime = null;
         this.phaseTimeout = null;
         
+        // Insights tracking
+        this.currentWeekOffset = 0; // 0 = current week, -1 = previous week, etc.
+        this.dailySessions = {}; // Store daily meditation data
+        
         this.initElements();
         this.initEventListeners();
         this.loadStats();
@@ -32,6 +36,19 @@ class BreathingApp {
         this.settingsContainer = document.getElementById('settingsContainer');
         this.cycleRadios = document.querySelectorAll('input[name="cycles"]');
         this.notificationsToggle = document.getElementById('notificationsToggle');
+        
+        // Insights elements
+        this.insightsIcon = document.getElementById('insightsIcon');
+        this.insightsBackIcon = document.getElementById('insightsBackIcon');
+        this.insightsContainer = document.getElementById('insightsContainer');
+        this.todayMinutes = document.getElementById('todayMinutes');
+        this.weekMinutes = document.getElementById('weekMinutes');
+        this.monthMinutes = document.getElementById('monthMinutes');
+        this.weeklyChart = document.getElementById('weeklyChart');
+        this.weekRange = document.getElementById('weekRange');
+        this.prevWeek = document.getElementById('prevWeek');
+        this.nextWeek = document.getElementById('nextWeek');
+        this.recentSessions = document.getElementById('recentSessions');
     }
     
     initEventListeners() {
@@ -48,6 +65,12 @@ class BreathingApp {
         
         this.settingsIcon.addEventListener('click', () => this.showSettings());
         this.backIcon.addEventListener('click', () => this.hideSettings());
+        
+        this.insightsIcon.addEventListener('click', () => this.showInsights());
+        this.insightsBackIcon.addEventListener('click', () => this.hideInsights());
+        
+        this.prevWeek.addEventListener('click', () => this.navigateWeek(-1));
+        this.nextWeek.addEventListener('click', () => this.navigateWeek(1));
         
         this.cycleRadios.forEach(radio => {
             radio.addEventListener('change', (e) => this.handleCycleChange(e));
@@ -122,6 +145,9 @@ class BreathingApp {
         const sessionMinutes = Math.round(sessionTime / 60);
         this.totalMinutes += sessionMinutes;
         this.completedSessions++;
+        
+        // Save daily session data
+        this.saveDailySession(sessionMinutes, this.totalCycles);
         this.saveStats();
         
         this.showNotification('Meditation Complete', `Great job! You completed ${this.totalCycles} breathing cycles.`);
@@ -285,6 +311,181 @@ class BreathingApp {
             this.totalMinutes = parsed.totalMinutes || 0;
         }
         this.loadSettings();
+        this.loadDailySessions();
+    }
+    
+    // Insights functionality
+    showInsights() {
+        this.breatheContainer.style.display = 'none';
+        this.insightsContainer.classList.remove('hidden');
+        this.updateInsightsData();
+        this.renderWeeklyChart();
+        this.renderRecentSessions();
+    }
+    
+    hideInsights() {
+        this.insightsContainer.classList.add('hidden');
+        this.breatheContainer.style.display = 'flex';
+    }
+    
+    saveDailySession(minutes, cycles) {
+        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
+        
+        if (!this.dailySessions[today]) {
+            this.dailySessions[today] = {
+                minutes: 0,
+                sessions: [],
+                cycles: 0
+            };
+        }
+        
+        this.dailySessions[today].minutes += minutes;
+        this.dailySessions[today].cycles += cycles;
+        this.dailySessions[today].sessions.push({
+            timestamp: Date.now(),
+            minutes: minutes,
+            cycles: cycles
+        });
+        
+        localStorage.setItem('dailySessions', JSON.stringify(this.dailySessions));
+    }
+    
+    loadDailySessions() {
+        const data = localStorage.getItem('dailySessions');
+        if (data) {
+            this.dailySessions = JSON.parse(data);
+        }
+    }
+    
+    updateInsightsData() {
+        const today = new Date();
+        const todayStr = today.toISOString().split('T')[0];
+        
+        // Today's minutes
+        const todayMinutes = this.dailySessions[todayStr]?.minutes || 0;
+        this.todayMinutes.textContent = todayMinutes;
+        
+        // This week's minutes
+        const weekStart = this.getWeekStart(today);
+        let weekMinutes = 0;
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(weekStart);
+            date.setDate(weekStart.getDate() + i);
+            const dateStr = date.toISOString().split('T')[0];
+            weekMinutes += this.dailySessions[dateStr]?.minutes || 0;
+        }
+        this.weekMinutes.textContent = weekMinutes;
+        
+        // This month's minutes
+        const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+        const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+        let monthMinutes = 0;
+        
+        for (let d = new Date(monthStart); d <= monthEnd; d.setDate(d.getDate() + 1)) {
+            const dateStr = d.toISOString().split('T')[0];
+            monthMinutes += this.dailySessions[dateStr]?.minutes || 0;
+        }
+        this.monthMinutes.textContent = monthMinutes;
+    }
+    
+    renderWeeklyChart() {
+        const today = new Date();
+        const chartWeek = new Date(today);
+        chartWeek.setDate(today.getDate() + (this.currentWeekOffset * 7));
+        
+        const weekStart = this.getWeekStart(chartWeek);
+        const weekEnd = new Date(weekStart);
+        weekEnd.setDate(weekStart.getDate() + 6);
+        
+        // Update week range display
+        const options = { month: 'short', day: 'numeric' };
+        this.weekRange.textContent = `${weekStart.toLocaleDateString('en-US', options)} - ${weekEnd.toLocaleDateString('en-US', options)}`;
+        
+        // Clear chart
+        this.weeklyChart.innerHTML = '';
+        
+        // Get max minutes for scaling
+        let maxMinutes = 0;
+        const weekData = [];
+        
+        for (let i = 0; i < 7; i++) {
+            const date = new Date(weekStart);
+            date.setDate(weekStart.getDate() + i);
+            const dateStr = date.toISOString().split('T')[0];
+            const minutes = this.dailySessions[dateStr]?.minutes || 0;
+            weekData.push(minutes);
+            maxMinutes = Math.max(maxMinutes, minutes);
+        }
+        
+        // Render bars
+        weekData.forEach(minutes => {
+            const bar = document.createElement('div');
+            const height = maxMinutes > 0 ? (minutes / maxMinutes) * 100 : 0;
+            bar.className = 'flex-1 bg-blue-500/60 rounded-t transition-all hover:bg-blue-500/80';
+            bar.style.height = `${Math.max(height, 2)}%`; // Minimum 2% height for visibility
+            bar.title = `${minutes} minutes`;
+            this.weeklyChart.appendChild(bar);
+        });
+    }
+    
+    renderRecentSessions() {
+        this.recentSessions.innerHTML = '';
+        
+        // Get all sessions and sort by timestamp
+        const allSessions = [];
+        Object.entries(this.dailySessions).forEach(([date, dayData]) => {
+            dayData.sessions.forEach(session => {
+                allSessions.push({
+                    ...session,
+                    date: date
+                });
+            });
+        });
+        
+        allSessions.sort((a, b) => b.timestamp - a.timestamp);
+        
+        // Show last 5 sessions
+        allSessions.slice(0, 5).forEach(session => {
+            const sessionEl = document.createElement('div');
+            sessionEl.className = 'flex justify-between items-center text-sm';
+            
+            const date = new Date(session.date);
+            const isToday = session.date === new Date().toISOString().split('T')[0];
+            const dateStr = isToday ? 'Today' : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            
+            sessionEl.innerHTML = `
+                <span class="text-white/70">${dateStr}</span>
+                <span class="text-blue-400">${session.minutes}min • ${session.cycles} cycles</span>
+            `;
+            
+            this.recentSessions.appendChild(sessionEl);
+        });
+        
+        if (allSessions.length === 0) {
+            this.recentSessions.innerHTML = '<div class="text-white/50 text-sm text-center">No sessions yet</div>';
+        }
+    }
+    
+    navigateWeek(direction) {
+        this.currentWeekOffset += direction;
+        this.renderWeeklyChart();
+        
+        // Disable next week button if trying to go into future
+        const today = new Date();
+        const chartWeek = new Date(today);
+        chartWeek.setDate(today.getDate() + (this.currentWeekOffset * 7));
+        
+        if (chartWeek > today) {
+            this.currentWeekOffset -= direction; // Revert
+            this.renderWeeklyChart();
+        }
+    }
+    
+    getWeekStart(date) {
+        const d = new Date(date);
+        const day = d.getDay();
+        const diff = d.getDate() - day; // Sunday = 0
+        return new Date(d.setDate(diff));
     }
 }
 
