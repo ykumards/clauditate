@@ -1,4 +1,4 @@
-const { ipcRenderer } = require('electron');
+// Remove direct electron access - now using secure electronAPI from preload script
 
 class BreathingApp {
     constructor() {
@@ -17,9 +17,13 @@ class BreathingApp {
         this.currentWeekOffset = 0; // 0 = current week, -1 = previous week, etc.
         this.dailySessions = {}; // Store daily meditation data
         
+        this.init();
+    }
+    
+    async init() {
         this.initElements();
         this.initEventListeners();
-        this.loadStats();
+        await this.loadStats();
         this.updateDisplay();
     }
     
@@ -49,6 +53,12 @@ class BreathingApp {
         this.prevWeek = document.getElementById('prevWeek');
         this.nextWeek = document.getElementById('nextWeek');
         this.recentSessions = document.getElementById('recentSessions');
+        
+        // Completion elements
+        this.completionOverlay = document.getElementById('completionOverlay');
+        this.completionMessage = document.getElementById('completionMessage');
+        this.completionCloseBtn = document.getElementById('completionCloseBtn');
+        this.confettiContainer = document.getElementById('confettiContainer');
     }
     
     initEventListeners() {
@@ -77,6 +87,8 @@ class BreathingApp {
         });
         
         this.notificationsToggle.addEventListener('change', () => this.saveSettings());
+        
+        this.completionCloseBtn.addEventListener('click', () => this.hideCompletionMessage());
     }
     
     selectCycles(cycles) {
@@ -106,7 +118,7 @@ class BreathingApp {
         this.startBreatheCycle();
     }
     
-    stop() {
+    async stop() {
         if (!this.isRunning) return;
         
         this.isRunning = false;
@@ -128,13 +140,13 @@ class BreathingApp {
                 this.completedSessions++;
             }
             
-            this.saveStats();
+            await this.saveStats();
         }
         
         this.resetUI();
     }
     
-    complete() {
+    async complete() {
         if (!this.isRunning) return;
         
         this.isRunning = false;
@@ -147,10 +159,10 @@ class BreathingApp {
         this.completedSessions++;
         
         // Save daily session data
-        this.saveDailySession(sessionMinutes, this.totalCycles);
-        this.saveStats();
+        await this.saveDailySession(sessionMinutes, this.totalCycles);
+        await this.saveStats();
         
-        this.showNotification('Meditation Complete', `Great job! You completed ${this.totalCycles} breathing cycles.`);
+        this.showCompletionMessage();
         this.resetUI();
     }
     
@@ -163,11 +175,11 @@ class BreathingApp {
         this.updateDisplay();
     }
     
-    startBreatheCycle() {
+    async startBreatheCycle() {
         if (!this.isRunning) return;
         
         if (this.currentCycle >= this.totalCycles) {
-            this.complete();
+            await this.complete();
             return;
         }
         
@@ -211,8 +223,8 @@ class BreathingApp {
     transitionToNext() {
         if (!this.isRunning) return;
         
-        this.phaseTimeout = setTimeout(() => {
-            this.startBreatheCycle();
+        this.phaseTimeout = setTimeout(async () => {
+            await this.startBreatheCycle();
         }, 1000);
     }
     
@@ -222,31 +234,55 @@ class BreathingApp {
             : `${this.totalCycles} breaths`;
     }
     
-    showNotification(title, body) {
-        if (window.Notification && Notification.permission === 'granted') {
-            new Notification(title, {
-                body: body,
-                icon: 'assets/icon.png',
-                silent: false
-            });
-        } else if (window.Notification && Notification.permission === 'default') {
-            Notification.requestPermission().then(permission => {
-                if (permission === 'granted') {
-                    new Notification(title, {
-                        body: body,
-                        icon: 'assets/icon.png',
-                        silent: false
-                    });
-                }
-            });
-        }
+    showCompletionMessage() {
+        this.completionMessage.textContent = `Great job! You completed ${this.totalCycles} breathing cycles.`;
+        this.completionOverlay.classList.remove('hidden');
+        this.completionOverlay.classList.add('completion-overlay');
+        this.createConfetti();
     }
     
-    saveStats() {
-        localStorage.setItem('breathingStats', JSON.stringify({
+    hideCompletionMessage() {
+        this.completionOverlay.classList.add('hidden');
+        this.completionOverlay.classList.remove('completion-overlay');
+        this.clearConfetti();
+    }
+    
+    createConfetti() {
+        this.clearConfetti();
+        const colors = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981'];
+        
+        for (let i = 0; i < 30; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti-piece';
+            confetti.style.left = Math.random() * 100 + '%';
+            confetti.style.animationDelay = Math.random() * 2 + 's';
+            confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+            confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+            this.confettiContainer.appendChild(confetti);
+        }
+        
+        // Auto cleanup after animation
+        setTimeout(() => {
+            this.clearConfetti();
+        }, 4000);
+    }
+    
+    clearConfetti() {
+        this.confettiContainer.innerHTML = '';
+    }
+    
+    async saveStats() {
+        const stats = {
             completedSessions: this.completedSessions,
             totalMinutes: this.totalMinutes
-        }));
+        };
+        
+        if (window.electronAPI) {
+            await window.electronAPI.saveStats(stats);
+        } else {
+            // Fallback to localStorage for development
+            localStorage.setItem('breathingStats', JSON.stringify(stats));
+        }
     }
     
     showSettings() {
@@ -266,20 +302,36 @@ class BreathingApp {
         this.saveSettings();
     }
     
-    saveSettings() {
+    async saveSettings() {
         const settings = {
             defaultCycles: this.totalCycles,
             notifications: this.notificationsToggle.checked
         };
-        localStorage.setItem('breathingSettings', JSON.stringify(settings));
+        
+        if (window.electronAPI) {
+            await window.electronAPI.saveSettings(settings);
+        } else {
+            // Fallback to localStorage for development
+            localStorage.setItem('breathingSettings', JSON.stringify(settings));
+        }
     }
     
-    loadSettings() {
-        const settings = localStorage.getItem('breathingSettings');
+    async loadSettings() {
+        let settings = null;
+        
+        if (window.electronAPI) {
+            settings = await window.electronAPI.loadSettings();
+        } else {
+            // Fallback to localStorage for development
+            const settingsStr = localStorage.getItem('breathingSettings');
+            if (settingsStr) {
+                settings = JSON.parse(settingsStr);
+            }
+        }
+        
         if (settings) {
-            const parsed = JSON.parse(settings);
-            this.totalCycles = parsed.defaultCycles || 5;
-            this.notificationsToggle.checked = parsed.notifications !== false;
+            this.totalCycles = settings.defaultCycles || 5;
+            this.notificationsToggle.checked = settings.notifications !== false;
             
             // Update UI to reflect loaded settings
             this.updateSettingsUI();
@@ -303,15 +355,26 @@ class BreathingApp {
         this.selectCycles(this.totalCycles);
     }
     
-    loadStats() {
-        const stats = localStorage.getItem('breathingStats');
-        if (stats) {
-            const parsed = JSON.parse(stats);
-            this.completedSessions = parsed.completedSessions || 0;
-            this.totalMinutes = parsed.totalMinutes || 0;
+    async loadStats() {
+        let stats = null;
+        
+        if (window.electronAPI) {
+            stats = await window.electronAPI.loadStats();
+        } else {
+            // Fallback to localStorage for development
+            const statsStr = localStorage.getItem('breathingStats');
+            if (statsStr) {
+                stats = JSON.parse(statsStr);
+            }
         }
-        this.loadSettings();
-        this.loadDailySessions();
+        
+        if (stats) {
+            this.completedSessions = stats.completedSessions || 0;
+            this.totalMinutes = stats.totalMinutes || 0;
+        }
+        
+        await this.loadSettings();
+        await this.loadDailySessions();
     }
     
     // Insights functionality
@@ -328,7 +391,7 @@ class BreathingApp {
         this.breatheContainer.style.display = 'flex';
     }
     
-    saveDailySession(minutes, cycles) {
+    async saveDailySession(minutes, cycles) {
         const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
         
         if (!this.dailySessions[today]) {
@@ -347,13 +410,29 @@ class BreathingApp {
             cycles: cycles
         });
         
-        localStorage.setItem('dailySessions', JSON.stringify(this.dailySessions));
+        if (window.electronAPI) {
+            await window.electronAPI.saveDailySessions(this.dailySessions);
+        } else {
+            // Fallback to localStorage for development
+            localStorage.setItem('dailySessions', JSON.stringify(this.dailySessions));
+        }
     }
     
-    loadDailySessions() {
-        const data = localStorage.getItem('dailySessions');
+    async loadDailySessions() {
+        let data = null;
+        
+        if (window.electronAPI) {
+            data = await window.electronAPI.loadDailySessions();
+        } else {
+            // Fallback to localStorage for development
+            const dataStr = localStorage.getItem('dailySessions');
+            if (dataStr) {
+                data = JSON.parse(dataStr);
+            }
+        }
+        
         if (data) {
-            this.dailySessions = JSON.parse(data);
+            this.dailySessions = data;
         }
     }
     
@@ -491,8 +570,4 @@ class BreathingApp {
 
 window.addEventListener('DOMContentLoaded', () => {
     new BreathingApp();
-    
-    if (window.Notification && Notification.permission === 'default') {
-        Notification.requestPermission();
-    }
 });

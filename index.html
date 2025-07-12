@@ -420,6 +420,63 @@
             font-weight: 400;
             color: rgba(255,255,255,0.9);
         }
+        
+        /* Confetti Animation */
+        .confetti-piece {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(45deg, #3b82f6, #60a5fa);
+            animation: confetti-fall 3s ease-in-out forwards;
+            opacity: 0.8;
+        }
+        
+        .confetti-piece:nth-child(2n) {
+            background: linear-gradient(45deg, #8b5cf6, #a78bfa);
+            width: 6px;
+            height: 6px;
+            animation-delay: 0.1s;
+        }
+        
+        .confetti-piece:nth-child(3n) {
+            background: linear-gradient(45deg, #06b6d4, #67e8f9);
+            width: 10px;
+            height: 4px;
+            animation-delay: 0.2s;
+        }
+        
+        .confetti-piece:nth-child(4n) {
+            background: linear-gradient(45deg, #10b981, #6ee7b7);
+            width: 4px;
+            height: 10px;
+            animation-delay: 0.15s;
+        }
+        
+        @keyframes confetti-fall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        .completion-overlay {
+            animation: fadeIn 0.3s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
     </style>
 </head>
 <body>
@@ -473,6 +530,21 @@
             <button class="w-full max-w-[200px] h-12 bg-red-500 hover:bg-red-600 text-white font-medium rounded-full transition-colors hidden" id="stopBtn">
                 Stop
             </button>
+        </div>
+        
+        <!-- Completion Message -->
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden" id="completionOverlay">
+            <div class="bg-gradient-to-br from-dark-primary to-dark-secondary p-8 rounded-2xl border border-white/20 text-center max-w-sm mx-4 relative overflow-hidden">
+                <div class="confetti-container absolute inset-0 pointer-events-none" id="confettiContainer"></div>
+                <div class="relative z-10">
+                    <div class="text-4xl mb-4">🎉</div>
+                    <h2 class="text-xl font-semibold text-white mb-3">Meditation Complete!</h2>
+                    <p class="text-white/70 mb-6" id="completionMessage">Great job! You completed 5 breathing cycles.</p>
+                    <button class="bg-blue-500 hover:bg-blue-600 text-white font-medium px-6 py-2 rounded-full transition-colors" id="completionCloseBtn">
+                        Continue
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
         
