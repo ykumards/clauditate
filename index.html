@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Breathe - Meditation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        'dark-primary': '#1a1a2e',
+                        'dark-secondary': '#16213e',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            user-select: none;
+            overflow: hidden;
+            width: 300px;
+            height: 450px;
+        }
+        
+        .container {
+            text-align: center;
+            width: 300px;
+            height: 450px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 25px 0;
+            box-sizing: border-box;
+        }
+        
+        .breathe-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+            justify-content: center;
+        }
+        
+        .breathe-visual {
+            width: 140px;
+            height: 140px;
+            position: relative;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .circle-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .breath-circle {
+            position: absolute;
+            border-radius: 50%;
+            border: 2px solid rgba(147,197,253,0.3);
+            background: radial-gradient(circle, rgba(59,130,246,0.1) 0%, transparent 70%);
+            transition: all 5s cubic-bezier(0.4, 0.0, 0.6, 1);
+        }
+        
+        .breath-circle:nth-child(1) {
+            width: 60px;
+            height: 60px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+        
+        .breath-circle:nth-child(2) {
+            width: 80px;
+            height: 80px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.7;
+            animation-delay: 0.3s;
+        }
+        
+        .breath-circle:nth-child(3) {
+            width: 100px;
+            height: 100px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            opacity: 0.5;
+            animation-delay: 0.6s;
+        }
+        
+        .center-dot {
+            width: 8px;
+            height: 8px;
+            background: rgba(147,197,253,0.8);
+            border-radius: 50%;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 10;
+        }
+        
+        /* Breathing animations */
+        .breathing-in .breath-circle:nth-child(1) {
+            width: 6rem !important;
+            height: 6rem !important;
+            opacity: 0.9;
+        }
+        
+        .breathing-in .breath-circle:nth-child(2) {
+            width: 8rem !important;
+            height: 8rem !important;
+            opacity: 0.6;
+        }
+        
+        .breathing-in .breath-circle:nth-child(3) {
+            width: 10rem !important;
+            height: 10rem !important;
+            opacity: 0.3;
+        }
+        
+        .breathing-out .breath-circle:nth-child(1) {
+            width: 3rem !important;
+            height: 3rem !important;
+            opacity: 0.3;
+        }
+        
+        .breathing-out .breath-circle:nth-child(2) {
+            width: 4.5rem !important;
+            height: 4.5rem !important;
+            opacity: 0.2;
+        }
+        
+        .breathing-out .breath-circle:nth-child(3) {
+            width: 6rem !important;
+            height: 6rem !important;
+            opacity: 0.1;
+        }
+        
+        .instruction {
+            font-size: 22px;
+            font-weight: 200;
+            margin: 10px 0 20px 0;
+            opacity: 0.95;
+            transition: all 0.3s ease;
+            letter-spacing: 0.5px;
+        }
+        
+        .cycle-info {
+            font-size: 14px;
+            opacity: 0.6;
+            margin: 0 0 10px 0;
+            font-weight: 300;
+        }
+        
+        .cycle-selector {
+            display: flex;
+            gap: 10px;
+            margin: 0;
+            justify-content: center;
+            margin-top: auto;
+        }
+        
+        .cycle-btn {
+            width: 48px;
+            height: 48px;
+            border: 1.5px solid rgba(147,197,253,0.3);
+            background: rgba(30,41,59,0.5);
+            color: rgba(255,255,255,0.9);
+            border-radius: 50%;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 300;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .cycle-btn.active {
+            background: rgba(59,130,246,0.3);
+            border-color: rgba(147,197,253,0.6);
+            color: white;
+        }
+        
+        .cycle-btn:hover {
+            background: rgba(59,130,246,0.2);
+            transform: scale(1.05);
+        }
+        
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin: 15px 0;
+        }
+        
+        button.main-btn {
+            padding: 14px 40px;
+            border: none;
+            border-radius: 30px;
+            font-size: 16px;
+            font-weight: 400;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(59,130,246,0.8);
+            color: white;
+            backdrop-filter: blur(10px);
+            letter-spacing: 0.5px;
+        }
+        
+        button.main-btn:hover {
+            background: rgba(59,130,246,0.9);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 15px rgba(59,130,246,0.3);
+        }
+        
+        button.main-btn:active {
+            transform: translateY(0);
+        }
+        
+        .stats {
+            background: rgba(30,41,59,0.4);
+            border-radius: 12px;
+            padding: 10px 16px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(147,197,253,0.1);
+            display: none;
+        }
+        
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            margin: 4px 0;
+            font-size: 11px;
+            opacity: 0.8;
+            font-weight: 300;
+        }
+        
+        .header {
+            position: relative;
+            height: 30px;
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            padding: 0 15px;
+        }
+        
+        .settings-icon {
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+        
+        .settings-icon:hover {
+            opacity: 1;
+        }
+        
+        .settings-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            box-sizing: border-box;
+            z-index: 100;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+        }
+        
+        .settings-header h2 {
+            margin: 0;
+            font-size: 17px;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+        
+        .back-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            cursor: pointer;
+            opacity: 0.6;
+            transition: all 0.2s;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.05);
+        }
+        
+        .back-icon:hover {
+            opacity: 1;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .settings-content {
+            padding: 8px 16px;
+            flex: 1;
+        }
+        
+        .setting-group {
+            background: rgba(255,255,255,0.03);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 8px;
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+        
+        .setting-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            color: rgba(255,255,255,0.6);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .radio-group {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin: 0;
+        }
+        
+        .radio-group input[type="radio"] {
+            display: none;
+        }
+        
+        .radio-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 60px;
+            height: 36px;
+            background: rgba(255,255,255,0.04);
+            color: rgba(255,255,255,0.5);
+            border-radius: 18px;
+            font-size: 15px;
+            cursor: pointer;
+            transition: all 0.15s ease;
+            font-weight: 500;
+            border: 2px solid transparent;
+            margin: 0 auto;
+        }
+        
+        .radio-group input[type="radio"]:checked + .radio-label {
+            background: rgba(59,130,246,0.15);
+            border-color: #3b82f6;
+            color: #93bbfb;
+        }
+        
+        .radio-label:hover {
+            background: rgba(255,255,255,0.08);
+        }
+        
+        .setting-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .setting-toggle input[type="checkbox"] {
+            appearance: none;
+            width: 48px;
+            height: 28px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .setting-toggle input[type="checkbox"]:checked {
+            background: #3b82f6;
+        }
+        
+        .setting-toggle input[type="checkbox"]::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 12px;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .setting-toggle input[type="checkbox"]:checked::after {
+            transform: translateX(20px);
+        }
+        
+        .setting-toggle span {
+            font-size: 15px;
+            font-weight: 400;
+            color: rgba(255,255,255,0.9);
+        }
+    </style>
+</head>
+<body>
+    <div class="w-full h-full flex flex-col">
+        <!-- Header -->
+        <div class="flex justify-between items-center p-4">
+            <div class="text-white text-lg font-medium" id="cycleInfo">5 breaths</div>
+            <button class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-white/10 transition-colors" id="settingsIcon">
+                <svg class="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.50 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Main Content -->
+        <div class="flex-1 flex flex-col items-center justify-center px-6 pb-6" id="breatheContainer">
+            
+            <!-- Breathing Visual -->
+            <div class="relative w-32 h-32 mb-8" id="breatheVisual">
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <div class="breath-circle absolute w-16 h-16 rounded-full border-2 border-blue-400/30 bg-blue-400/10 transition-all duration-[5000ms] ease-in-out"></div>
+                    <div class="breath-circle absolute w-20 h-20 rounded-full border-2 border-blue-400/20 bg-blue-400/5 transition-all duration-[5000ms] ease-in-out"></div>
+                    <div class="breath-circle absolute w-24 h-24 rounded-full border-2 border-blue-400/10 bg-transparent transition-all duration-[5000ms] ease-in-out"></div>
+                    <div class="absolute w-2 h-2 bg-blue-400 rounded-full"></div>
+                </div>
+            </div>
+            
+            <!-- Instruction -->
+            <div class="text-white text-xl font-light mb-8" id="instruction">Breathe</div>
+            
+            <!-- Cycle Selector -->
+            <div class="grid grid-cols-4 gap-2 w-full mb-8 max-w-[240px]">
+                <button class="cycle-btn h-10 rounded-full border-2 border-blue-500 bg-blue-500/20 text-blue-300 font-medium transition-all hover:bg-blue-500/30 text-sm" data-cycles="5">5</button>
+                <button class="cycle-btn h-10 rounded-full border-2 border-white/20 bg-white/5 text-white/70 font-medium transition-all hover:bg-white/10 text-sm" data-cycles="10">10</button>
+                <button class="cycle-btn h-10 rounded-full border-2 border-white/20 bg-white/5 text-white/70 font-medium transition-all hover:bg-white/10 text-sm" data-cycles="20">20</button>
+                <button class="cycle-btn h-10 rounded-full border-2 border-white/20 bg-white/5 text-white/70 font-medium transition-all hover:bg-white/10 text-sm" data-cycles="30">30</button>
+            </div>
+            
+            <!-- Start/Stop Button -->
+            <button class="w-full max-w-[200px] h-12 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-full transition-colors" id="startBtn">
+                Start
+            </button>
+            <button class="w-full max-w-[200px] h-12 bg-red-500 hover:bg-red-600 text-white font-medium rounded-full transition-colors hidden" id="stopBtn">
+                Stop
+            </button>
+        </div>
+    </div>
+        
+        <div class="fixed inset-0 bg-gradient-to-br from-dark-primary to-dark-secondary flex flex-col z-50 hidden" id="settingsContainer">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-5 border-b border-white/10">
+                <h2 class="text-lg font-semibold text-white">Settings</h2>
+                <button class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 hover:bg-white/20 transition-colors" id="backIcon">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <!-- Content -->
+            <div class="flex-1 p-4 space-y-4">
+                <!-- Default Cycle Count -->
+                <div class="bg-white/5 rounded-xl p-5 border border-white/10">
+                    <label class="block text-xs font-medium text-white/60 uppercase tracking-wider mb-4">Default Cycle Count</label>
+                    <div class="grid grid-cols-4 gap-3">
+                        <label class="relative">
+                            <input type="radio" name="cycles" value="5" class="sr-only" id="cycles5">
+                            <div class="cycle-option w-full h-12 bg-white/5 border-2 border-transparent rounded-full flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10">5</div>
+                        </label>
+                        <label class="relative">
+                            <input type="radio" name="cycles" value="10" class="sr-only" id="cycles10" checked>
+                            <div class="cycle-option w-full h-12 bg-white/5 border-2 border-transparent rounded-full flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10">10</div>
+                        </label>
+                        <label class="relative">
+                            <input type="radio" name="cycles" value="20" class="sr-only" id="cycles20">
+                            <div class="cycle-option w-full h-12 bg-white/5 border-2 border-transparent rounded-full flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10">20</div>
+                        </label>
+                        <label class="relative">
+                            <input type="radio" name="cycles" value="30" class="sr-only" id="cycles30">
+                            <div class="cycle-option w-full h-12 bg-white/5 border-2 border-transparent rounded-full flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10">30</div>
+                        </label>
+                    </div>
+                </div>
+                
+                <!-- Notifications -->
+                <div class="bg-white/5 rounded-xl p-5 border border-white/10">
+                    <label class="block text-xs font-medium text-white/60 uppercase tracking-wider mb-4">Notifications</label>
+                    <div class="flex items-center justify-between">
+                        <span class="text-white font-medium">Session completion alerts</span>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" id="notificationsToggle" checked>
+                            <div class="relative w-12 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="renderer.js"></script>
+</body>
+</html>
