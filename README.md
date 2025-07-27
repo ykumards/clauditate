@@ -1,6 +1,6 @@
 # Clauditate
 
-> **⚠️ Early Release v1.1.1** - Please report issues!
+> **⚠️ Early Release v1.1.2** - Please report issues!
 > 
 > Mindful meditation app that integrates with Claude Code for automatic breathing breaks during development
 
@@ -124,7 +124,7 @@ We welcome contributions! Please:
 
 ## ⚠️ Disclaimer
 
-**IMPORTANT**: This is an early release (v1.1.1). While we've tested it carefully:
+**IMPORTANT**: This is an early release (v1.1.2). While we've tested it carefully:
 
 - This software is provided "AS IS" without warranty of any kind
 - Use at your own risk
