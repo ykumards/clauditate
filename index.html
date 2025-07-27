@@ -9,26 +9,10 @@
             theme: {
                 extend: {
                     animation: {
-                        'breathe-in': 'breatheIn 5s cubic-bezier(0.4, 0, 0.6, 1)',
-                        'breathe-out': 'breatheOut 5s cubic-bezier(0.4, 0, 0.6, 1)',
-                        'glow': 'glow 5s ease-in-out',
-                        'glow-reverse': 'glow 5s ease-in-out reverse',
                         'confetti-fall': 'confettiFall 3s ease-in-out forwards',
                         'fade-in': 'fadeIn 0.3s ease-out'
                     },
                     keyframes: {
-                        breatheIn: {
-                            '0%': { width: '40px', height: '40px', opacity: '0.5' },
-                            '100%': { width: '160px', height: '160px', opacity: '0.9' }
-                        },
-                        breatheOut: {
-                            '0%': { width: '160px', height: '160px', opacity: '0.9' },
-                            '100%': { width: '40px', height: '40px', opacity: '0.5' }
-                        },
-                        glow: {
-                            '0%, 100%': { opacity: '0.3', transform: 'translate(-50%, -50%) scale(0.8)' },
-                            '50%': { opacity: '0.8', transform: 'translate(-50%, -50%) scale(1.2)' }
-                        },
                         confettiFall: {
                             '0%': { transform: 'translateY(-100vh) rotate(0deg)', opacity: '1' },
                             '100%': { transform: 'translateY(100vh) rotate(720deg)', opacity: '0' }
@@ -52,42 +36,75 @@
             -moz-osx-font-smoothing: grayscale;
         }
         
-        /* Essential animations for breathing circles */
+        /* Simple breathing animation - just scale, nothing else */
         .breath-circle {
             position: absolute;
             top: 50%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            transition: all 5s cubic-bezier(0.4, 0, 0.6, 1);
+            transform: translate(-50%, -50%) scale(1);
+            transition: transform 5s ease-in-out;
         }
         
-        .breath-circle-1 { width: 40px; height: 40px; }
-        .breath-circle-2 { width: 60px; height: 60px; opacity: 0.7; }
-        .breath-circle-3 { width: 80px; height: 80px; opacity: 0.5; }
-        .breath-circle-4 { width: 100px; height: 100px; opacity: 0.3; }
-        .breath-circle-5 { width: 120px; height: 120px; opacity: 0.2; }
+        /* Initial sizes */
+        .breath-circle-1 { 
+            width: 50px; 
+            height: 50px;
+            opacity: 0.8;
+        }
         
-        /* Breathing in state */
-        .breathing-in .breath-circle-1 { width: 80px; height: 80px; opacity: 0.9; }
-        .breathing-in .breath-circle-2 { width: 110px; height: 110px; opacity: 0.7; }
-        .breathing-in .breath-circle-3 { width: 140px; height: 140px; opacity: 0.5; }
-        .breathing-in .breath-circle-4 { width: 170px; height: 170px; opacity: 0.3; }
-        .breathing-in .breath-circle-5 { width: 200px; height: 200px; opacity: 0.15; }
+        .breath-circle-2 { 
+            width: 70px; 
+            height: 70px; 
+            opacity: 0.6;
+        }
         
-        /* Breathing out state */
-        .breathing-out .breath-circle-1 { width: 20px; height: 20px; opacity: 0.4; }
-        .breathing-out .breath-circle-2 { width: 35px; height: 35px; opacity: 0.3; }
-        .breathing-out .breath-circle-3 { width: 50px; height: 50px; opacity: 0.2; }
-        .breathing-out .breath-circle-4 { width: 65px; height: 65px; opacity: 0.1; }
-        .breathing-out .breath-circle-5 { width: 80px; height: 80px; opacity: 0.05; }
+        .breath-circle-3 { 
+            width: 90px; 
+            height: 90px; 
+            opacity: 0.4;
+        }
+        
+        .breath-circle-4 { 
+            width: 110px; 
+            height: 110px; 
+            opacity: 0.25;
+        }
+        
+        .breath-circle-5 { 
+            width: 130px; 
+            height: 130px; 
+            opacity: 0.15;
+        }
+        
+        /* Breathing in - circles expand */
+        .breathing-in .breath-circle-1 { transform: translate(-50%, -50%) scale(2); }
+        .breathing-in .breath-circle-2 { transform: translate(-50%, -50%) scale(1.8); }
+        .breathing-in .breath-circle-3 { transform: translate(-50%, -50%) scale(1.7); }
+        .breathing-in .breath-circle-4 { transform: translate(-50%, -50%) scale(1.6); }
+        .breathing-in .breath-circle-5 { transform: translate(-50%, -50%) scale(1.5); }
+        
+        /* Breathing out - circles contract */
+        .breathing-out .breath-circle-1 { transform: translate(-50%, -50%) scale(0.8); }
+        .breathing-out .breath-circle-2 { transform: translate(-50%, -50%) scale(0.85); }
+        .breathing-out .breath-circle-3 { transform: translate(-50%, -50%) scale(0.9); }
+        .breathing-out .breath-circle-4 { transform: translate(-50%, -50%) scale(0.92); }
+        .breathing-out .breath-circle-5 { transform: translate(-50%, -50%) scale(0.95); }
+        
+        /* Center dot */
+        .center-dot {
+            transition: transform 5s ease-in-out, box-shadow 5s ease-in-out;
+        }
         
         .breathing-in .center-dot {
-            animation: glow 5s ease-in-out;
+            transform: translate(-50%, -50%) scale(1.5);
+            box-shadow: 0 0 30px rgba(255,255,255,0.9), 0 0 50px rgba(79,158,255,0.6);
         }
         
         .breathing-out .center-dot {
-            animation: glow 5s ease-in-out reverse;
+            transform: translate(-50%, -50%) scale(0.8);
+            box-shadow: 0 0 10px rgba(255,255,255,0.4), 0 0 20px rgba(79,158,255,0.2);
         }
+        
         
         /* Scrollbar styling */
         .custom-scrollbar::-webkit-scrollbar {
@@ -149,12 +166,12 @@
             <!-- Breathing Visual -->
             <div class="relative w-40 h-40 mb-8" id="breatheVisual">
                 <div class="absolute inset-0 flex items-center justify-center">
-                    <div class="breath-circle breath-circle-1 rounded-full border border-blue-400/15 bg-gradient-radial from-blue-400/5 to-transparent shadow-[0_0_20px_rgba(79,158,255,0.1)] shadow-[inset_0_0_20px_rgba(79,158,255,0.05)]"></div>
-                    <div class="breath-circle breath-circle-2 rounded-full border border-blue-400/15 bg-gradient-radial from-blue-400/5 to-transparent"></div>
-                    <div class="breath-circle breath-circle-3 rounded-full border border-blue-400/15 bg-gradient-radial from-blue-400/5 to-transparent"></div>
-                    <div class="breath-circle breath-circle-4 rounded-full border border-blue-400/15 bg-gradient-radial from-blue-400/5 to-transparent"></div>
-                    <div class="breath-circle breath-circle-5 rounded-full border border-blue-400/15 bg-gradient-radial from-blue-400/5 to-transparent"></div>
-                    <div class="center-dot absolute w-2 h-2 bg-white/80 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 shadow-[0_0_20px_rgba(255,255,255,0.6)] shadow-[0_0_40px_rgba(79,158,255,0.4)]"></div>
+                    <div class="breath-circle breath-circle-1 rounded-full border border-blue-400/20 bg-gradient-to-br from-blue-400/10 via-blue-500/5 to-transparent shadow-[0_0_30px_rgba(79,158,255,0.15)] shadow-[inset_0_0_30px_rgba(79,158,255,0.08)]"></div>
+                    <div class="breath-circle breath-circle-2 rounded-full border border-blue-400/15 bg-gradient-to-br from-blue-400/8 via-transparent to-transparent shadow-[0_0_25px_rgba(79,158,255,0.1)]"></div>
+                    <div class="breath-circle breath-circle-3 rounded-full border border-blue-400/10 bg-gradient-to-br from-blue-400/5 to-transparent"></div>
+                    <div class="breath-circle breath-circle-4 rounded-full border border-blue-400/8 bg-gradient-to-br from-blue-400/3 to-transparent"></div>
+                    <div class="breath-circle breath-circle-5 rounded-full border border-blue-400/5 bg-gradient-to-br from-blue-400/2 to-transparent"></div>
+                    <div class="center-dot absolute w-2 h-2 bg-white/90 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 shadow-[0_0_20px_rgba(255,255,255,0.6),0_0_40px_rgba(79,158,255,0.4)]"></div>
                 </div>
             </div>
             

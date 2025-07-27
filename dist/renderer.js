@@ -169,7 +169,7 @@ class BreathingApp {
         this.startBtn.classList.remove('hidden');
         this.stopBtn.classList.add('hidden');
         this.cycleButtons.forEach(btn => btn.style.opacity = '1');
-        this.breatheVisual.className = 'relative w-32 h-32 mb-8';
+        this.breatheVisual.className = 'relative w-40 h-40 mb-8';
         this.instruction.textContent = '';
         this.updateDisplay();
     }
@@ -188,7 +188,7 @@ class BreathingApp {
         if (!this.isRunning)
             return;
         this.currentPhase = 'breatheIn';
-        this.breatheVisual.className = 'relative w-32 h-32 mb-8 breathing-in';
+        this.breatheVisual.className = 'relative w-40 h-40 mb-8 breathing-in';
         this.instruction.textContent = 'Breathe In';
         this.phaseTimeout = setTimeout(() => {
             this.transitionToOut();
@@ -205,7 +205,7 @@ class BreathingApp {
         if (!this.isRunning)
             return;
         this.currentPhase = 'breatheOut';
-        this.breatheVisual.className = 'relative w-32 h-32 mb-8 breathing-out';
+        this.breatheVisual.className = 'relative w-40 h-40 mb-8 breathing-out';
         this.instruction.textContent = 'Breathe Out';
         this.phaseTimeout = setTimeout(() => {
             this.transitionToNext();
