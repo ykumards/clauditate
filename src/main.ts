@@ -114,6 +114,10 @@ ipcMain.handle('load-daily-sessions', async (event) => {
   return readJsonFile<DailySessions>(dailySessionsPath);
 });
 
+ipcMain.handle('quit-app', async (event) => {
+  app.quit();
+});
+
 mb.on('ready', () => {
   console.log('Menubar app is ready');
   setupIPCServer();
@@ -149,6 +153,16 @@ const setupIPCServer = (): void => {
   ipcServer = net.createServer((socket) => {
     console.log('CLI client connected');
     
+    const safeWrite = (data: string) => {
+      if (!socket.destroyed && socket.writable) {
+        try {
+          socket.write(data);
+        } catch (error) {
+          console.log('Socket write failed (client disconnected):', error instanceof Error ? error.message : String(error));
+        }
+      }
+    };
+    
     socket.on('data', (data) => {
       try {
         const command = data.toString().trim();
@@ -158,31 +172,31 @@ const setupIPCServer = (): void => {
           case 'show':
             try {
               mb.showWindow();
-              socket.write('shown\n');
+              safeWrite('shown\n');
             } catch (error) {
-              socket.write('error: failed to show\n');
+              safeWrite('error: failed to show\n');
             }
             break;
             
           case 'hide':
             try {
               mb.hideWindow();
-              socket.write('hidden\n');
+              safeWrite('hidden\n');
             } catch (error) {
-              socket.write('error: failed to hide\n');
+              safeWrite('error: failed to hide\n');
             }
             break;
             
           case 'ping':
-            socket.write('pong\n');
+            safeWrite('pong\n');
             break;
             
           default:
-            socket.write('error: unknown command\n');
+            safeWrite('error: unknown command\n');
         }
       } catch (error) {
         console.error('Error processing command:', error);
-        socket.write('error: processing failed\n');
+        safeWrite('error: processing failed\n');
       }
     });
 

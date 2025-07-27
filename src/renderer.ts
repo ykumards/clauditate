@@ -55,6 +55,7 @@ class BreathingApp {
   private settingsContainer!: HTMLElement;
   private cycleRadios!: NodeListOf<HTMLInputElement>;
   private notificationsToggle!: HTMLInputElement;
+  private quitBtn!: HTMLButtonElement;
   
   // Insights elements
   private insightsIcon!: HTMLElement;
@@ -99,6 +100,7 @@ class BreathingApp {
     this.settingsContainer = this.getElementById('settingsContainer');
     this.cycleRadios = document.querySelectorAll('input[name="cycles"]') as NodeListOf<HTMLInputElement>;
     this.notificationsToggle = this.getElementById('notificationsToggle') as HTMLInputElement;
+    this.quitBtn = this.getElementById('quitBtn') as HTMLButtonElement;
     
     // Insights elements
     this.insightsIcon = this.getElementById('insightsIcon');
@@ -156,6 +158,8 @@ class BreathingApp {
     });
     
     this.notificationsToggle.addEventListener('change', () => this.saveSettings());
+    
+    this.quitBtn.addEventListener('click', () => this.quitApp());
     
     this.completionCloseBtn.addEventListener('click', () => this.hideCompletionMessage());
   }
@@ -636,6 +640,15 @@ class BreathingApp {
     const day = d.getDay();
     const diff = d.getDate() - day; // Sunday = 0
     return new Date(d.setDate(diff));
+  }
+  
+  private async quitApp(): Promise<void> {
+    if (window.electronAPI) {
+      await window.electronAPI.quitApp();
+    } else {
+      // Fallback for development - just close the window
+      window.close();
+    }
   }
 }
 

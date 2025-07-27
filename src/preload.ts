@@ -34,6 +34,7 @@ interface ElectronAPI {
   loadStats: () => Promise<StatsData | null>;
   saveDailySessions: (sessions: DailySessions) => Promise<boolean>;
   loadDailySessions: () => Promise<DailySessions | null>;
+  quitApp: () => Promise<void>;
 }
 
 // Expose protected methods that allow the renderer process to use
@@ -59,7 +60,11 @@ contextBridge.exposeInMainWorld('electronAPI', {
   saveDailySessions: (sessions: DailySessions): Promise<boolean> => 
     ipcRenderer.invoke('save-daily-sessions', sessions),
   loadDailySessions: (): Promise<DailySessions | null> => 
-    ipcRenderer.invoke('load-daily-sessions')
+    ipcRenderer.invoke('load-daily-sessions'),
+  
+  // App control
+  quitApp: (): Promise<void> => 
+    ipcRenderer.invoke('quit-app')
 } as ElectronAPI);
 
 // Extend the Window interface to include our API
