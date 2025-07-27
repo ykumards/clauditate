@@ -1,10 +1,10 @@
 # Clauditate
 
-> **⚠️ Early Release v1.1.2** - Please report issues!
+> **⚠️ Early Release v1.1.3** - Please report issues!
 > 
-> Mindful meditation app that integrates with Claude Code for automatic breathing breaks during development
+> A menubar meditation app that helps you stay mindful while Claude Code works
 
-Clauditate combines meditation with coding by automatically showing a beautiful breathing app whenever Claude Code is thinking or processing. Stay centered and mindful while Claude helps you code!
+Clauditate appears automatically when Claude Code is processing, giving you gentle breathing exercises to keep you present instead of letting your mind wander. Simple, unobtrusive, and surprisingly effective at maintaining focus during development.
 
 ## Features
 
@@ -124,7 +124,7 @@ We welcome contributions! Please:
 
 ## ⚠️ Disclaimer
 
-**IMPORTANT**: This is an early release (v1.1.2). While we've tested it carefully:
+**IMPORTANT**: This is an early release (v1.1.3). While we've tested it carefully:
 
 - This software is provided "AS IS" without warranty of any kind
 - Use at your own risk

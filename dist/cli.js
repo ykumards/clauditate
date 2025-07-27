@@ -97,7 +97,11 @@ class ClauditateCLI {
             return;
         }
         if (options.hookClaude) {
-            await this.installHooks();
+            await this.installHooks(false);
+            return;
+        }
+        if (options.hookDemo) {
+            await this.installHooks(true);
             return;
         }
         if (options.unhookClaude) {
@@ -146,6 +150,9 @@ class ClauditateCLI {
                 case '--hook-claude':
                     options.hookClaude = true;
                     break;
+                case '--hook-demo':
+                    options.hookDemo = true;
+                    break;
                 case '--unhook-claude':
                     options.unhookClaude = true;
                     break;
@@ -172,6 +179,7 @@ Commands:
   --smart-show      Show the meditation app (only if timing is right)
   --hide, -h        Hide the meditation app (for hooks)
   --hook-claude     Install Claude Code hooks integration
+  --hook-demo       Install demo hooks (always show for demonstrations)
   --unhook-claude   Remove Claude Code hooks integration
   --update-hooks    Update Claude Code hooks to latest version
   --help            Show this help
@@ -241,6 +249,27 @@ After installation, the app will automatically appear when Claude Code is thinki
             log.silent('Smart show failed: ' + (error instanceof Error ? error.message : String(error)));
         }
     }
+    async demoShowApp() {
+        try {
+            // Check if app is running first
+            const isRunning = await this.isAppRunning();
+            if (!isRunning) {
+                log.silent('App not running - respecting user choice to work without interruptions');
+                return;
+            }
+            // Always show for demo purposes
+            const response = await this.sendIPCCommand('show');
+            if (response.startsWith('error')) {
+                log.silent('Demo show command failed: ' + response);
+            }
+            else {
+                log.silent('App shown for demo');
+            }
+        }
+        catch (error) {
+            log.silent('Demo show failed: ' + (error instanceof Error ? error.message : String(error)));
+        }
+    }
     async hideApp() {
         try {
             const response = await this.sendIPCCommand('hide');
@@ -264,8 +293,8 @@ After installation, the app will automatically appear when Claude Code is thinki
             return false;
         }
     }
-    async installHooks() {
-        log.info('Installing Claude Code hooks...');
+    async installHooks(demoMode = false) {
+        log.info(demoMode ? 'Installing Claude Code demo hooks...' : 'Installing Claude Code hooks...');
         const homeDir = process.env.HOME || process.env.USERPROFILE;
         if (!homeDir) {
             log.error('Could not determine home directory');
@@ -293,17 +322,42 @@ After installation, the app will automatically appear when Claude Code is thinki
             settings.hooks = {};
         }
         const cliPath = path.join(this.appPath, 'dist', 'cli.js');
-        settings.hooks.PreToolUse = [
-            {
+        const hookCommand = demoMode ? '--show' : '--smart-show';
+        // Initialize PreToolUse if it doesn't exist
+        if (!settings.hooks.PreToolUse) {
+            settings.hooks.PreToolUse = [];
+        }
+        // Check if clauditate hook already exists
+        const clauditateHookExists = settings.hooks.PreToolUse.some((hookGroup) => hookGroup.hooks.some((hook) => hook.command && hook.command.includes('clauditate')));
+        // Only add if it doesn't already exist
+        if (!clauditateHookExists) {
+            settings.hooks.PreToolUse.push({
                 matcher: "",
                 hooks: [
                     {
                         type: "command",
-                        command: `node "${cliPath}" --smart-show`
+                        command: `node "${cliPath}" ${hookCommand}`
                     }
                 ]
-            }
-        ];
+            });
+        }
+        else {
+            // Update existing clauditate hook
+            settings.hooks.PreToolUse = settings.hooks.PreToolUse.map((hookGroup) => {
+                if (hookGroup.hooks.some((hook) => hook.command && hook.command.includes('clauditate'))) {
+                    return {
+                        matcher: "",
+                        hooks: [
+                            {
+                                type: "command",
+                                command: `node "${cliPath}" ${hookCommand}`
+                            }
+                        ]
+                    };
+                }
+                return hookGroup;
+            });
+        }
         // Remove PostToolUse hook - we don't want to hide between tools
         // settings.hooks.PostToolUse = [
         //   {
@@ -366,11 +420,38 @@ After installation, the app will automatically appear when Claude Code is thinki
             log.error('Could not parse Claude Code settings');
             return;
         }
-        // Remove clauditate hooks
+        // Remove only clauditate hooks, leave other tools' hooks intact
         if (settings.hooks) {
-            delete settings.hooks.PreToolUse;
-            // delete settings.hooks.PostToolUse; // Not used anymore
-            delete settings.hooks.Stop; // Clean up old Stop hooks if they exist
+            // Filter out clauditate hooks from PreToolUse
+            if (settings.hooks.PreToolUse) {
+                settings.hooks.PreToolUse = settings.hooks.PreToolUse.filter((hookGroup) => {
+                    return !hookGroup.hooks.some((hook) => hook.command && hook.command.includes('clauditate'));
+                });
+                // Remove empty PreToolUse array
+                if (settings.hooks.PreToolUse.length === 0) {
+                    delete settings.hooks.PreToolUse;
+                }
+            }
+            // Filter out clauditate hooks from PostToolUse
+            if (settings.hooks.PostToolUse) {
+                settings.hooks.PostToolUse = settings.hooks.PostToolUse.filter((hookGroup) => {
+                    return !hookGroup.hooks.some((hook) => hook.command && hook.command.includes('clauditate'));
+                });
+                // Remove empty PostToolUse array
+                if (settings.hooks.PostToolUse.length === 0) {
+                    delete settings.hooks.PostToolUse;
+                }
+            }
+            // Filter out clauditate hooks from Stop (legacy cleanup)
+            if (settings.hooks.Stop) {
+                settings.hooks.Stop = settings.hooks.Stop.filter((hookGroup) => {
+                    return !hookGroup.hooks.some((hook) => hook.command && hook.command.includes('clauditate'));
+                });
+                // Remove empty Stop array
+                if (settings.hooks.Stop.length === 0) {
+                    delete settings.hooks.Stop;
+                }
+            }
             // If hooks object is empty, remove it
             if (Object.keys(settings.hooks).length === 0) {
                 delete settings.hooks;

@@ -123,7 +123,8 @@ class PreferencesManager {
     async shouldShowMeditation() {
         try {
             const data = await this.loadPreferences();
-            const { preferences, lastSessionTimestamp } = data;
+            const { preferences } = data;
+            const lastSessionTimestamp = data.lastSessionTimestamp;
             // Check if mindfulness is enabled
             if (!preferences.enabled) {
                 return false;
