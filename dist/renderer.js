@@ -169,8 +169,8 @@ class BreathingApp {
         this.startBtn.classList.remove('hidden');
         this.stopBtn.classList.add('hidden');
         this.cycleButtons.forEach(btn => btn.style.opacity = '1');
-        this.breatheVisual.className = 'relative w-40 h-40 mb-8';
-        this.instruction.textContent = '';
+        this.breatheVisual.className = 'relative w-40 h-40 mb-4';
+        this.instruction.textContent = '\u00A0';
         this.updateDisplay();
     }
     async startBreatheCycle() {
@@ -188,7 +188,7 @@ class BreathingApp {
         if (!this.isRunning)
             return;
         this.currentPhase = 'breatheIn';
-        this.breatheVisual.className = 'relative w-40 h-40 mb-8 breathing-in';
+        this.breatheVisual.className = 'relative w-40 h-40 mb-4 breathing-in';
         this.instruction.textContent = 'Breathe In';
         this.phaseTimeout = setTimeout(() => {
             this.transitionToOut();
@@ -205,7 +205,7 @@ class BreathingApp {
         if (!this.isRunning)
             return;
         this.currentPhase = 'breatheOut';
-        this.breatheVisual.className = 'relative w-40 h-40 mb-8 breathing-out';
+        this.breatheVisual.className = 'relative w-40 h-40 mb-4 breathing-out';
         this.instruction.textContent = 'Breathe Out';
         this.phaseTimeout = setTimeout(() => {
             this.transitionToNext();
@@ -304,20 +304,22 @@ class BreathingApp {
     }
     updateSnoozeIcon(isSnooze) {
         if (isSnooze) {
-            // Snooze is ON (notifications disabled)
+            // Snooze is ON (notifications disabled) - Bell with slash
             this.snoozeIcon.innerHTML = `
-        <svg class="w-5 h-5 text-red-400" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        <svg class="w-5 h-5 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 5a2 2 0 114 0v.341C15.67 6.165 17 8.388 17 11v3.159c0 .538.214 1.055.595 1.436L19 17H5l1.405-1.405A2.032 2.032 0 007 14.158V11c0-2.612 1.33-4.835 3-5.659V5z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.73 21a2 2 0 01-3.46 0"></path>
+          <line stroke-linecap="round" stroke-linejoin="round" stroke-width="2" x1="3" y1="3" x2="21" y2="21"></line>
         </svg>
       `;
             this.snoozeIcon.title = "Notifications OFF - Click to enable";
             this.snoozeIcon.style.opacity = "1";
         }
         else {
-            // Snooze is OFF (notifications enabled)
+            // Snooze is OFF (notifications enabled) - Regular bell
             this.snoozeIcon.innerHTML = `
         <svg class="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path>
         </svg>
       `;
             this.snoozeIcon.title = "Notifications ON - Click to snooze";

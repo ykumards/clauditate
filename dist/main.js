@@ -47,7 +47,7 @@ const mb = (0, menubar_1.menubar)({
     showDockIcon: false,
     browserWindow: {
         width: 300,
-        height: 450,
+        height: 480,
         resizable: false,
         show: false,
         webPreferences: {
