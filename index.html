@@ -269,25 +269,26 @@
         }
         
         .settings-container {
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 300px;
+            height: 450px;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
             box-sizing: border-box;
             z-index: 100;
-            overflow-y: auto;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
         }
         
         .settings-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 20px;
+            padding: 16px 20px;
             border-bottom: 1px solid rgba(255,255,255,0.06);
+            flex-shrink: 0;
         }
         
         .settings-header h2 {
@@ -317,26 +318,25 @@
         }
         
         .settings-content {
-            padding: 8px 16px;
             flex: 1;
+            overflow-y: auto;
+            padding: 16px;
         }
         
         .setting-group {
             background: rgba(255,255,255,0.03);
             border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
             border: 1px solid rgba(255,255,255,0.06);
         }
         
         .setting-group label {
             display: block;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 500;
-            margin-bottom: 16px;
-            color: rgba(255,255,255,0.6);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+            color: rgba(255,255,255,0.9);
         }
         
         .radio-group {
@@ -367,7 +367,8 @@
             margin: 0 auto;
         }
         
-        .radio-group input[type="radio"]:checked + .radio-label {
+        .radio-group input[type="radio"]:checked + .cycle-option,
+        input[type="radio"]:checked + .cycle-option {
             background: rgba(59,130,246,0.15);
             border-color: #3b82f6;
             color: #93bbfb;
@@ -562,38 +563,44 @@
             <!-- Content -->
             <div class="flex-1 p-4 space-y-4">
                 <!-- Default Cycle Count -->
-                <div class="bg-white/5 rounded-xl p-5 border border-white/10">
-                    <label class="block text-xs font-medium text-white/60 uppercase tracking-wider mb-4">Default Cycle Count</label>
-                    <div class="grid grid-cols-4 gap-3">
+                <div class="bg-white/5 rounded-lg p-4 border border-white/10">
+                    <div class="text-sm font-medium text-white/90 mb-3">Default cycles</div>
+                    <div class="grid grid-cols-4 gap-2">
                         <label class="relative">
                             <input type="radio" name="cycles" value="5" class="sr-only" id="cycles5">
-                            <div class="cycle-option w-full h-12 bg-white/5 border-2 border-transparent rounded-full flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10">5</div>
+                            <div class="cycle-option w-full h-10 bg-white/5 border border-transparent rounded-lg flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10 text-sm">5</div>
                         </label>
                         <label class="relative">
                             <input type="radio" name="cycles" value="10" class="sr-only" id="cycles10" checked>
-                            <div class="cycle-option w-full h-12 bg-white/5 border-2 border-transparent rounded-full flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10">10</div>
+                            <div class="cycle-option w-full h-10 bg-white/5 border border-transparent rounded-lg flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10 text-sm">10</div>
                         </label>
                         <label class="relative">
                             <input type="radio" name="cycles" value="20" class="sr-only" id="cycles20">
-                            <div class="cycle-option w-full h-12 bg-white/5 border-2 border-transparent rounded-full flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10">20</div>
+                            <div class="cycle-option w-full h-10 bg-white/5 border border-transparent rounded-lg flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10 text-sm">20</div>
                         </label>
                         <label class="relative">
                             <input type="radio" name="cycles" value="30" class="sr-only" id="cycles30">
-                            <div class="cycle-option w-full h-12 bg-white/5 border-2 border-transparent rounded-full flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10">30</div>
+                            <div class="cycle-option w-full h-10 bg-white/5 border border-transparent rounded-lg flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10 text-sm">30</div>
                         </label>
                     </div>
                 </div>
                 
                 <!-- Notifications -->
-                <div class="bg-white/5 rounded-xl p-5 border border-white/10">
-                    <label class="block text-xs font-medium text-white/60 uppercase tracking-wider mb-4">Notifications</label>
+                <div class="bg-white/5 rounded-lg p-4 border border-white/10">
                     <div class="flex items-center justify-between">
-                        <span class="text-white font-medium">Session completion alerts</span>
+                        <span class="text-sm font-medium text-white/90">Notifications</span>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" class="sr-only peer" id="notificationsToggle" checked>
-                            <div class="relative w-12 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-6 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
+                            <div class="relative w-11 h-6 bg-white/20 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-5 peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-500"></div>
                         </label>
                     </div>
+                </div>
+                
+                <!-- Quit Button -->
+                <div class="flex justify-center mt-6">
+                    <button class="px-6 py-2 bg-red-500/20 hover:bg-red-500/30 border border-red-500/50 hover:border-red-500/70 text-red-300 hover:text-red-200 font-medium rounded-lg transition-all" id="quitBtn">
+                        Quit
+                    </button>
                 </div>
             </div>
         </div>

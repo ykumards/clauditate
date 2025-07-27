@@ -1,0 +1,39 @@
+# Source files (dist is included)
+src/
+*.ts
+!dist/**/*.d.ts
+
+# Development files
+.git/
+.gitignore
+*.log
+*.tmp
+.DS_Store
+node_modules/
+.env
+.env.*
+
+# Build/config files
+tsconfig.json
+.eslintrc*
+.prettierrc*
+
+# Homebrew formula
+clauditate.rb
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Test files
+test/
+tests/
+*.test.*
+*.spec.*
+
+# Documentation source
+docs/
+*.md
+!README.md

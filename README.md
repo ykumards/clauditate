@@ -1,5 +1,7 @@
 # Clauditate
 
+> **⚠️ Early Release v1.0.1** - Please report issues!
+> 
 > Mindful meditation app that integrates with Claude Code for automatic breathing breaks during development
 
 Clauditate combines meditation with coding by automatically showing a beautiful breathing app whenever Claude Code is thinking or processing. Stay centered and mindful while Claude helps you code!
@@ -19,30 +21,30 @@ Clauditate combines meditation with coding by automatically showing a beautiful 
 ### npm (recommended)
 ```bash
 npm install -g clauditate
-clauditate --install  # Set up Claude Code integration
+clauditate --hook-claude  # Set up Claude Code integration
 ```
 
 ### Homebrew (macOS)
 ```bash
-brew tap clauditate/tap
+brew tap ykumards/tap
 brew install clauditate
-clauditate --install  # Set up Claude Code integration
+clauditate --hook-claude  # Set up Claude Code integration
 ```
 
 ### Manual Installation
 ```bash
-git clone https://github.com/clauditate/clauditate.git
+git clone https://github.com/ykumards/clauditate.git
 cd clauditate
 npm install
 npm run build
 npm link
-clauditate --install
+clauditate --hook-claude
 ```
 
 ## Usage
 
 ### Automatic Mode (Recommended)
-After running `clauditate --install`, the app will automatically:
+After running `clauditate --hook-claude`, the app will automatically:
 - Show when Claude Code starts any tool operation
 - Hide when Claude Code finishes
 - Provide gentle breathing guidance during Claude's thinking time
@@ -57,8 +59,9 @@ clauditate --help       # Show all commands
 
 ### Managing Integration
 ```bash
-clauditate --install    # Install Claude Code hooks
-clauditate --uninstall  # Remove Claude Code hooks
+clauditate --hook-claude    # Install Claude Code hooks
+clauditate --unhook-claude  # Remove Claude Code hooks
+clauditate --update-hooks   # Update hooks to latest version
 ```
 
 ## How It Works
@@ -102,7 +105,7 @@ Clauditate automatically configures Claude Code hooks in `~/.claude/settings.jso
 ## Development
 
 ```bash
-git clone https://github.com/clauditate/clauditate.git
+git clone https://github.com/ykumards/clauditate.git
 cd clauditate
 npm install
 npm run build
@@ -129,9 +132,24 @@ We welcome contributions! Please:
 4. Push to the branch (`git push origin feature/amazing-feature`)
 5. Open a Pull Request
 
+## ⚠️ Disclaimer
+
+**IMPORTANT**: This is an early release (v1.0.1). While we've tested it carefully:
+
+- This software is provided "AS IS" without warranty of any kind
+- Use at your own risk
+- We are not responsible for any issues, interruptions, or meditation-induced enlightenment
+- This is an independent project, not officially affiliated with Anthropic or Claude
+
+Please report bugs and issues on [GitHub](https://github.com/ykumards/clauditate/issues).
+
 ## 📝 License
 
 MIT License - see [LICENSE](LICENSE) file for details.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
 
 ## Acknowledgments
 
@@ -141,10 +159,10 @@ MIT License - see [LICENSE](LICENSE) file for details.
 
 ## 🔗 Links
 
-- [GitHub Repository](https://github.com/clauditate/clauditate)
+- [GitHub Repository](https://github.com/ykumards/clauditate)
 - [npm Package](https://npmjs.com/package/clauditate)
 - [Claude Code Documentation](https://docs.anthropic.com/en/docs/claude-code)
-- [Report Issues](https://github.com/clauditate/clauditate/issues)
+- [Report Issues](https://github.com/ykumards/clauditate/issues)
 
 ---
 

@@ -1,23 +1,31 @@
 class Clauditate < Formula
   desc "Mindful meditation app that integrates with Claude Code for automatic breathing breaks"
-  homepage "https://github.com/clauditate/clauditate"
-  url "https://github.com/clauditate/clauditate/archive/v1.0.0.tar.gz"
+  homepage "https://github.com/ykumards/clauditate"
+  url "https://github.com/ykumards/clauditate/archive/v1.0.1.tar.gz"
   sha256 "PLACEHOLDER_SHA256"
   license "MIT"
 
   depends_on "node"
 
   def install
-    system "npm", "install", *Language::Node.std_npm_install_args(libexec)
-    system "npm", "run", "build", "--prefix", libexec
+    # Install dependencies
+    system "npm", "ci", "--production", "--prefix", buildpath
     
-    bin.install_symlink Dir["#{libexec}/bin/*"]
+    # Build the TypeScript
+    system "npm", "run", "build", "--prefix", buildpath
     
-    # Create wrapper script for the main clauditate command
+    # Copy everything to libexec
+    libexec.install Dir["*"]
+    
+    # Create the main executable
     (bin/"clauditate").write <<~EOS
       #!/bin/bash
-      exec "#{Formula["node"].bin}/node" "#{libexec}/dist/cli.js" "$@"
+      export NODE_PATH="#{libexec}/node_modules"
+      exec "#{Formula["node"].opt_bin}/node" "#{libexec}/dist/cli.js" "$@"
     EOS
+    
+    # Make it executable
+    chmod 0755, bin/"clauditate"
   end
 
   def post_install
@@ -25,7 +33,7 @@ class Clauditate < Formula
       🧘 Clauditate installed successfully!
 
       To integrate with Claude Code:
-        clauditate --install
+        clauditate --hook-claude
 
       To start the meditation app:
         clauditate --start
