@@ -40,6 +40,16 @@ const fs = __importStar(require("fs"));
 const net = __importStar(require("net"));
 const os = __importStar(require("os"));
 const preferences_1 = require("./preferences");
+// Simple logger that respects development mode
+const isDev = process.env.NODE_ENV === 'development';
+const log = {
+    debug: (msg) => { if (isDev)
+        console.log(msg); }, // Only in dev
+    info: (msg) => console.log(msg), // Always show user-facing messages
+    error: (msg) => console.error(msg), // Always show errors
+    silent: (msg) => { if (isDev)
+        console.log(msg); }, // Silent in production (IPC, internal)
+};
 class ClauditateCLI {
     constructor() {
         this.isRunning = false;
@@ -176,7 +186,7 @@ After installation, the app will automatically appear when Claude Code is thinki
     `);
     }
     async startApp() {
-        console.log('Starting Clauditate...');
+        log.info('Starting Clauditate...');
         const electronPath = path.join(this.appPath, 'node_modules', '.bin', 'electron');
         const mainPath = path.join(this.appPath, 'dist', 'main.js');
         const child = (0, child_process_1.spawn)(electronPath, [mainPath], {
@@ -184,22 +194,22 @@ After installation, the app will automatically appear when Claude Code is thinki
             detached: true
         });
         child.unref();
-        console.log('Clauditate started successfully!');
+        log.info('Clauditate started successfully!');
     }
     async showApp() {
         try {
             // Try to show via IPC first
             const response = await this.sendIPCCommand('show');
             if (response.startsWith('error')) {
-                console.error('Show command failed:', response);
+                log.error('Show command failed: ' + response);
             }
             else {
-                console.log('App shown successfully');
+                log.silent('App shown successfully');
             }
         }
         catch (error) {
             // If IPC fails, app is not running - respect user's choice to quit
-            console.log('App not running - respecting user choice to work without interruptions');
+            log.silent('App not running - respecting user choice to work without interruptions');
             // Don't auto-start the app
         }
     }
@@ -208,7 +218,7 @@ After installation, the app will automatically appear when Claude Code is thinki
             // Check if app is running first
             const isRunning = await this.isAppRunning();
             if (!isRunning) {
-                console.log('App not running - respecting user choice to work without interruptions');
+                log.silent('App not running - respecting user choice to work without interruptions');
                 return;
             }
             // App is running, check if we should show based on timing logic
@@ -217,32 +227,32 @@ After installation, the app will automatically appear when Claude Code is thinki
             if (shouldShow) {
                 const response = await this.sendIPCCommand('show');
                 if (response.startsWith('error')) {
-                    console.error('Smart show command failed:', response);
+                    log.silent('Smart show command failed: ' + response);
                 }
                 else {
-                    console.log('App shown based on smart timing');
+                    log.silent('App shown based on smart timing');
                 }
             }
             else {
-                console.log('Skipping show - not the right time for mindfulness');
+                log.silent('Skipping show - not the right time for mindfulness');
             }
         }
         catch (error) {
-            console.log('Smart show failed:', error instanceof Error ? error.message : String(error));
+            log.silent('Smart show failed: ' + (error instanceof Error ? error.message : String(error)));
         }
     }
     async hideApp() {
         try {
             const response = await this.sendIPCCommand('hide');
             if (response.startsWith('error')) {
-                console.error('Hide command failed:', response);
+                log.error('Hide command failed: ' + response);
             }
             else {
-                console.log('App hidden successfully');
+                log.silent('App hidden successfully');
             }
         }
         catch (error) {
-            console.error('Failed to hide app:', error);
+            log.silent('Failed to hide app: ' + String(error));
         }
     }
     async isAppRunning() {
@@ -255,10 +265,10 @@ After installation, the app will automatically appear when Claude Code is thinki
         }
     }
     async installHooks() {
-        console.log('Installing Claude Code hooks...');
+        log.info('Installing Claude Code hooks...');
         const homeDir = process.env.HOME || process.env.USERPROFILE;
         if (!homeDir) {
-            console.error('Could not determine home directory');
+            log.error('Could not determine home directory');
             process.exit(1);
         }
         const claudeDir = path.join(homeDir, '.claude');
@@ -275,7 +285,7 @@ After installation, the app will automatically appear when Claude Code is thinki
                 settings = JSON.parse(settingsContent);
             }
             catch (error) {
-                console.log('Creating new settings file...');
+                log.debug('Creating new settings file...');
             }
         }
         // Add clauditate hooks
@@ -320,30 +330,30 @@ After installation, the app will automatically appear when Claude Code is thinki
         // ];
         // Write settings back
         fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
-        console.log('✅ Claude Code hooks installed successfully!');
-        console.log('Clauditate will now appear automatically when Claude Code is thinking.');
+        log.info('✅ Claude Code hooks installed successfully!');
+        log.info('Clauditate will now appear automatically when Claude Code is thinking.');
     }
     async updateHooks() {
-        console.log('Updating Claude Code hooks...');
+        log.info('Updating Claude Code hooks...');
         // First uninstall existing hooks
         await this.uninstallHooks(true); // true = silent mode
         // Then install fresh hooks
         await this.installHooks();
-        console.log('✅ Claude Code hooks updated successfully!');
+        log.info('✅ Claude Code hooks updated successfully!');
     }
     async uninstallHooks(silent = false) {
         if (!silent) {
-            console.log('Uninstalling Claude Code hooks...');
+            log.info('Uninstalling Claude Code hooks...');
         }
         const homeDir = process.env.HOME || process.env.USERPROFILE;
         if (!homeDir) {
-            console.error('Could not determine home directory');
+            log.error('Could not determine home directory');
             process.exit(1);
         }
         const settingsPath = path.join(homeDir, '.claude', 'settings.json');
         if (!fs.existsSync(settingsPath)) {
             if (!silent) {
-                console.log('No Claude Code settings found.');
+                log.debug('No Claude Code settings found.');
             }
             return;
         }
@@ -353,7 +363,7 @@ After installation, the app will automatically appear when Claude Code is thinki
             settings = JSON.parse(settingsContent);
         }
         catch (error) {
-            console.error('Could not parse Claude Code settings');
+            log.error('Could not parse Claude Code settings');
             return;
         }
         // Remove clauditate hooks
@@ -368,7 +378,7 @@ After installation, the app will automatically appear when Claude Code is thinki
         }
         fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
         if (!silent) {
-            console.log('✅ Claude Code hooks uninstalled successfully!');
+            log.info('✅ Claude Code hooks uninstalled successfully!');
         }
     }
 }

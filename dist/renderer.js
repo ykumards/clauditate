@@ -452,6 +452,7 @@ class BreathingApp {
         this.updateInsightsData();
         this.renderWeeklyChart();
         this.renderRecentSessions();
+        this.updateSmartStatus();
     }
     hideInsights() {
         this.insightsContainer.classList.add('hidden');
@@ -621,6 +622,60 @@ class BreathingApp {
         const day = d.getDay();
         const diff = d.getDate() - day; // Sunday = 0
         return new Date(d.setDate(diff));
+    }
+    async updateSmartStatus() {
+        const statusEl = document.getElementById('smartStatus');
+        if (!statusEl)
+            return;
+        try {
+            // Get current preferences
+            const result = await window.electronAPI.loadPreferences();
+            if (!result.success || !result.preferences) {
+                statusEl.textContent = '• Error';
+                statusEl.className = 'text-red-400/40';
+                return;
+            }
+            const prefs = result.preferences;
+            const snoozeResult = await window.electronAPI.getSnoozeStatus();
+            const isSnooze = snoozeResult.success ? (snoozeResult.isSnooze || false) : false;
+            // Check various conditions
+            if (!prefs.enabled) {
+                statusEl.textContent = '• Disabled';
+                statusEl.className = 'text-white/20';
+            }
+            else if (isSnooze) {
+                statusEl.textContent = '• Snoozed';
+                statusEl.className = 'text-orange-400/40';
+            }
+            else {
+                // Check if within work hours
+                const now = new Date();
+                const currentTime = now.toTimeString().substring(0, 5);
+                const withinWorkHours = currentTime >= prefs.workHoursStart && currentTime <= prefs.workHoursEnd;
+                if (!withinWorkHours) {
+                    statusEl.textContent = '• After hours';
+                    statusEl.className = 'text-white/20';
+                }
+                else {
+                    // Check daily goal
+                    const today = now.toISOString().split('T')[0];
+                    const todayMinutes = this.dailySessions[today]?.minutes || 0;
+                    if (todayMinutes >= prefs.dailyGoalMinutes) {
+                        statusEl.textContent = '• Goal reached';
+                        statusEl.className = 'text-green-400/40';
+                    }
+                    else {
+                        statusEl.textContent = '• Active';
+                        statusEl.className = 'text-blue-400/40';
+                    }
+                }
+            }
+        }
+        catch (error) {
+            console.error('Error updating smart status:', error);
+            statusEl.textContent = '• Unknown';
+            statusEl.className = 'text-white/20';
+        }
     }
     async quitApp() {
         if (window.electronAPI) {

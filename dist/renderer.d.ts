@@ -110,6 +110,7 @@ declare class BreathingApp {
     private renderRecentSessions;
     private navigateWeek;
     private getWeekStart;
+    private updateSmartStatus;
     private quitApp;
 }
 //# sourceMappingURL=renderer.d.ts.map
