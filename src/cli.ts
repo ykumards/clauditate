@@ -318,17 +318,18 @@ After installation, the app will automatically appear when Claude Code is thinki
     //   }
     // ];
 
-    settings.hooks.Stop = [
-      {
-        matcher: "",
-        hooks: [
-          {
-            type: "command",
-            command: `node "${cliPath}" --hide`
-          }
-        ]
-      }
-    ];
+    // Remove Stop hook - let user control when to hide
+    // settings.hooks.Stop = [
+    //   {
+    //     matcher: "",
+    //     hooks: [
+    //       {
+    //         type: "command",
+    //         command: `node "${cliPath}" --hide`
+    //       }
+    //     ]
+    //   }
+    // ];
 
     // Write settings back
     fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
@@ -383,7 +384,7 @@ After installation, the app will automatically appear when Claude Code is thinki
     if (settings.hooks) {
       delete settings.hooks.PreToolUse;
       // delete settings.hooks.PostToolUse; // Not used anymore
-      delete settings.hooks.Stop;
+      delete settings.hooks.Stop; // Clean up old Stop hooks if they exist
       
       // If hooks object is empty, remove it
       if (Object.keys(settings.hooks).length === 0) {

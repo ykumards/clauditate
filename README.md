@@ -1,6 +1,6 @@
 # Clauditate
 
-> **⚠️ Early Release v1.1.0** - Please report issues!
+> **⚠️ Early Release v1.1.1** - Please report issues!
 > 
 > Mindful meditation app that integrates with Claude Code for automatic breathing breaks during development
 
@@ -26,8 +26,7 @@ clauditate --hook-claude  # Set up Claude Code integration
 
 ### Homebrew (macOS)
 ```bash
-brew tap ykumards/tap
-brew install clauditate
+brew install ykumards/clauditate/clauditate
 clauditate --hook-claude  # Set up Claude Code integration
 ```
 
@@ -69,14 +68,13 @@ clauditate --update-hooks   # Update hooks to latest version
 Clauditate uses Claude Code's [hooks system](https://docs.anthropic.com/en/docs/claude-code/hooks) to:
 
 1. **PreToolUse Hook**: Triggers when Claude starts any tool (Bash, Edit, Read, etc.)
-2. **PostToolUse Hook**: Triggers when Claude finishes a tool operation
-3. **Stop Hook**: Triggers when Claude finishes responding
 
-This creates natural meditation moments during development, helping you:
+The app intelligently appears when Claude begins thinking and stays visible until you manually dismiss it. This creates natural meditation moments during development, helping you:
 - Stay mindful during long Claude operations
 - Take breathing breaks during complex tasks
 - Maintain focus and reduce stress
 - Practice mindfulness without disrupting workflow
+- Control when to end meditation sessions
 
 
 ## Configuration
@@ -88,15 +86,7 @@ Clauditate automatically configures Claude Code hooks in `~/.claude/settings.jso
   "hooks": {
     "PreToolUse": [{
       "matcher": "",
-      "hooks": [{"type": "command", "command": "clauditate --show"}]
-    }],
-    "PostToolUse": [{
-      "matcher": "",
-      "hooks": [{"type": "command", "command": "clauditate --hide"}]
-    }],
-    "Stop": [{
-      "matcher": "",
-      "hooks": [{"type": "command", "command": "clauditate --hide"}]
+      "hooks": [{"type": "command", "command": "clauditate --smart-show"}]
     }]
   }
 }
@@ -134,7 +124,7 @@ We welcome contributions! Please:
 
 ## ⚠️ Disclaimer
 
-**IMPORTANT**: This is an early release (v1.1.0). While we've tested it carefully:
+**IMPORTANT**: This is an early release (v1.1.1). While we've tested it carefully:
 
 - This software is provided "AS IS" without warranty of any kind
 - Use at your own risk
