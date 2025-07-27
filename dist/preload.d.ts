@@ -27,6 +27,16 @@ interface ElectronAPI {
     loadStats: () => Promise<StatsData | null>;
     saveDailySessions: (sessions: DailySessions) => Promise<boolean>;
     loadDailySessions: () => Promise<DailySessions | null>;
+    toggleSnooze: () => Promise<{
+        success: boolean;
+        isSnooze?: boolean;
+        error?: string;
+    }>;
+    getSnoozeStatus: () => Promise<{
+        success: boolean;
+        isSnooze?: boolean;
+        error?: string;
+    }>;
     quitApp: () => Promise<void>;
 }
 declare global {

@@ -34,6 +34,8 @@ interface ElectronAPI {
   loadStats: () => Promise<StatsData | null>;
   saveDailySessions: (sessions: DailySessions) => Promise<boolean>;
   loadDailySessions: () => Promise<DailySessions | null>;
+  toggleSnooze: () => Promise<{ success: boolean; isSnooze?: boolean; error?: string }>;
+  getSnoozeStatus: () => Promise<{ success: boolean; isSnooze?: boolean; error?: string }>;
   quitApp: () => Promise<void>;
 }
 
@@ -61,6 +63,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('save-daily-sessions', sessions),
   loadDailySessions: (): Promise<DailySessions | null> => 
     ipcRenderer.invoke('load-daily-sessions'),
+  
+  // Snooze functionality
+  toggleSnooze: (): Promise<{ success: boolean; isSnooze?: boolean; error?: string }> => 
+    ipcRenderer.invoke('toggle-snooze'),
+  getSnoozeStatus: (): Promise<{ success: boolean; isSnooze?: boolean; error?: string }> => 
+    ipcRenderer.invoke('get-snooze-status'),
   
   // App control
   quitApp: (): Promise<void> => 

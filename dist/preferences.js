@@ -45,7 +45,8 @@ class PreferencesManager {
             workHoursEnd: "18:00",
             sessionLengthMinutes: 3,
             frequency: 'balanced',
-            enabled: true
+            enabled: true,
+            snoozed: false
         };
         const homeDir = os.homedir();
         const clauditateDir = path.join(homeDir, '.clauditate');
@@ -61,7 +62,8 @@ class PreferencesManager {
                 // Create default preferences on first run
                 const defaultData = {
                     preferences: { ...this.defaultPreferences },
-                    history: {}
+                    history: {},
+                    dismissalTimestamps: []
                 };
                 await this.savePreferences(defaultData);
                 return defaultData;
@@ -70,13 +72,18 @@ class PreferencesManager {
             const data = JSON.parse(content);
             // Merge with defaults in case new preferences were added
             data.preferences = { ...this.defaultPreferences, ...data.preferences };
+            // Ensure dismissalTimestamps exists for older data files
+            if (!data.dismissalTimestamps) {
+                data.dismissalTimestamps = [];
+            }
             return data;
         }
         catch (error) {
             console.error('Failed to load preferences:', error);
             return {
                 preferences: { ...this.defaultPreferences },
-                history: {}
+                history: {},
+                dismissalTimestamps: []
             };
         }
     }
@@ -121,6 +128,10 @@ class PreferencesManager {
             if (!preferences.enabled) {
                 return false;
             }
+            // Check if snoozed (manual override)
+            if (preferences.snoozed) {
+                return false;
+            }
             const now = new Date();
             // Check if within work hours
             if (!this.isWithinWorkHours(now, preferences)) {
@@ -139,6 +150,15 @@ class PreferencesManager {
             const todayMinutes = data.history[today]?.totalMinutes || 0;
             if (todayMinutes >= preferences.dailyGoalMinutes) {
                 return false; // Goal already achieved
+            }
+            // Check dismissal backoff - Option A: 2 dismissals in 30min → 2 hour cooldown
+            const dismissalsLast30Min = this.getRecentDismissalsFromData(data, 30);
+            if (dismissalsLast30Min.length >= 2) {
+                const latestDismissal = new Date(Math.max(...dismissalsLast30Min.map(d => new Date(d).getTime())));
+                const hoursSinceLatest = (now.getTime() - latestDismissal.getTime()) / (1000 * 60 * 60);
+                if (hoursSinceLatest < 2) {
+                    return false; // Still in 2-hour backoff period
+                }
             }
             // Calculate probability based on remaining time and goal
             const remainingMinutes = preferences.dailyGoalMinutes - todayMinutes;
@@ -189,6 +209,45 @@ class PreferencesManager {
             goal,
             percentage: Math.min(100, Math.round((completed / goal) * 100))
         };
+    }
+    async recordWindowShown() {
+        const data = await this.loadPreferences();
+        data.lastWindowShownAt = new Date().toISOString();
+        await this.savePreferences(data);
+    }
+    async checkForDismissal() {
+        const data = await this.loadPreferences();
+        const { lastWindowShownAt, lastSessionTimestamp } = data;
+        if (!lastWindowShownAt) {
+            return; // No window shown to dismiss
+        }
+        const shownTime = new Date(lastWindowShownAt);
+        const lastSession = lastSessionTimestamp ? new Date(lastSessionTimestamp) : null;
+        // If no session started since window was shown = dismissal
+        if (!lastSession || lastSession < shownTime) {
+            // Record dismissal
+            data.dismissalTimestamps.push(new Date().toISOString());
+            // Keep only last 24 hours of dismissals
+            const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+            data.dismissalTimestamps = data.dismissalTimestamps.filter(timestamp => new Date(timestamp) > oneDayAgo);
+            // Clear the shown timestamp
+            delete data.lastWindowShownAt;
+            await this.savePreferences(data);
+        }
+    }
+    getRecentDismissalsFromData(data, minutesBack) {
+        const cutoffTime = new Date(Date.now() - minutesBack * 60 * 1000);
+        return data.dismissalTimestamps.filter(timestamp => new Date(timestamp) > cutoffTime);
+    }
+    async toggleSnooze() {
+        const data = await this.loadPreferences();
+        data.preferences.snoozed = !data.preferences.snoozed;
+        await this.savePreferences(data);
+        return data.preferences.snoozed;
+    }
+    async isSnooze() {
+        const data = await this.loadPreferences();
+        return data.preferences.snoozed;
     }
 }
 exports.PreferencesManager = PreferencesManager;

@@ -39,6 +39,7 @@ const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const net = __importStar(require("net"));
 const os = __importStar(require("os"));
+const preferences_1 = require("./preferences");
 const mb = (0, menubar_1.menubar)({
     index: `file://${path.join(__dirname, '../index.html')}`,
     icon: '☯',
@@ -116,9 +117,41 @@ electron_1.ipcMain.handle('load-daily-sessions', async (event) => {
 electron_1.ipcMain.handle('quit-app', async (event) => {
     electron_1.app.quit();
 });
+electron_1.ipcMain.handle('toggle-snooze', async (event) => {
+    try {
+        const isSnooze = await preferencesManager.toggleSnooze();
+        return { success: true, isSnooze };
+    }
+    catch (error) {
+        console.error('Failed to toggle snooze:', error);
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
+    }
+});
+electron_1.ipcMain.handle('get-snooze-status', async (event) => {
+    try {
+        const isSnooze = await preferencesManager.isSnooze();
+        return { success: true, isSnooze };
+    }
+    catch (error) {
+        console.error('Failed to get snooze status:', error);
+        return { success: false, error: error instanceof Error ? error.message : String(error) };
+    }
+});
+// Initialize preferences manager
+const preferencesManager = new preferences_1.PreferencesManager();
 mb.on('ready', () => {
     console.log('Menubar app is ready');
     setupIPCServer();
+});
+// Track window shown for dismissal detection
+mb.on('show', async () => {
+    console.log('Window shown');
+    await preferencesManager.recordWindowShown();
+});
+// Track window hidden and check for dismissal
+mb.on('hide', async () => {
+    console.log('Window hidden');
+    await preferencesManager.checkForDismissal();
 });
 // Only open dev tools in development
 if (process.env.NODE_ENV === 'development') {

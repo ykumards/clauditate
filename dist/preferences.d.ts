@@ -5,6 +5,7 @@ export interface MindfulnessPreferences {
     sessionLengthMinutes: number;
     frequency: 'gentle' | 'balanced' | 'intensive';
     enabled: boolean;
+    snoozed: boolean;
 }
 export interface SessionHistory {
     [date: string]: {
@@ -19,6 +20,8 @@ export interface MindfulnessData {
     preferences: MindfulnessPreferences;
     history: SessionHistory;
     lastSessionTimestamp?: string;
+    lastWindowShownAt?: string;
+    dismissalTimestamps: string[];
 }
 export declare class PreferencesManager {
     private preferencesPath;
@@ -37,5 +40,10 @@ export declare class PreferencesManager {
         goal: number;
         percentage: number;
     }>;
+    recordWindowShown(): Promise<void>;
+    checkForDismissal(): Promise<void>;
+    private getRecentDismissalsFromData;
+    toggleSnooze(): Promise<boolean>;
+    isSnooze(): Promise<boolean>;
 }
 //# sourceMappingURL=preferences.d.ts.map

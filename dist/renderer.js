@@ -20,6 +20,7 @@ class BreathingApp {
         this.initElements();
         this.initEventListeners();
         await this.loadStats();
+        await this.loadSnoozeStatus();
         this.updateDisplay();
     }
     initElements() {
@@ -30,6 +31,7 @@ class BreathingApp {
         this.stopBtn = this.getElementById('stopBtn');
         this.cycleButtons = document.querySelectorAll('.cycle-btn');
         this.settingsIcon = this.getElementById('settingsIcon');
+        this.snoozeIcon = this.getElementById('snoozeIcon');
         this.backIcon = this.getElementById('backIcon');
         this.breatheContainer = this.getElementById('breatheContainer');
         this.settingsContainer = this.getElementById('settingsContainer');
@@ -74,6 +76,7 @@ class BreathingApp {
             });
         });
         this.settingsIcon.addEventListener('click', () => this.showSettings());
+        this.snoozeIcon.addEventListener('click', () => this.handleSnooze());
         this.backIcon.addEventListener('click', () => this.hideSettings());
         this.insightsIcon.addEventListener('click', () => this.showInsights());
         this.insightsBackIcon.addEventListener('click', () => this.hideInsights());
@@ -258,6 +261,55 @@ class BreathingApp {
     hideSettings() {
         this.settingsContainer.classList.add('hidden');
         this.breatheContainer.style.display = 'flex';
+    }
+    async handleSnooze() {
+        try {
+            const result = await window.electronAPI.toggleSnooze();
+            if (result.success) {
+                this.updateSnoozeIcon(result.isSnooze);
+            }
+            else {
+                console.error('Failed to toggle snooze:', result.error);
+            }
+        }
+        catch (error) {
+            console.error('Error toggling snooze:', error);
+        }
+    }
+    async loadSnoozeStatus() {
+        try {
+            const result = await window.electronAPI.getSnoozeStatus();
+            if (result.success) {
+                this.updateSnoozeIcon(result.isSnooze || false);
+            }
+        }
+        catch (error) {
+            console.error('Error loading snooze status:', error);
+            // Default to not snoozed
+            this.updateSnoozeIcon(false);
+        }
+    }
+    updateSnoozeIcon(isSnooze) {
+        if (isSnooze) {
+            // Snooze is ON (notifications disabled)
+            this.snoozeIcon.innerHTML = `
+        <svg class="w-5 h-5 text-red-400" fill="currentColor" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728L5.636 5.636m12.728 12.728L5.636 5.636M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      `;
+            this.snoozeIcon.title = "Notifications OFF - Click to enable";
+            this.snoozeIcon.style.opacity = "1";
+        }
+        else {
+            // Snooze is OFF (notifications enabled)
+            this.snoozeIcon.innerHTML = `
+        <svg class="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      `;
+            this.snoozeIcon.title = "Notifications ON - Click to snooze";
+            this.snoozeIcon.style.opacity = "0.6";
+        }
     }
     handleCycleChange(e) {
         const target = e.target;

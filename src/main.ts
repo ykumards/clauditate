@@ -4,6 +4,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import * as net from 'net';
 import * as os from 'os';
+import { PreferencesManager } from './preferences';
 
 const mb = menubar({
   index: `file://${path.join(__dirname, '../index.html')}`,
@@ -118,9 +119,44 @@ ipcMain.handle('quit-app', async (event) => {
   app.quit();
 });
 
+ipcMain.handle('toggle-snooze', async (event) => {
+  try {
+    const isSnooze = await preferencesManager.toggleSnooze();
+    return { success: true, isSnooze };
+  } catch (error) {
+    console.error('Failed to toggle snooze:', error);
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
+  }
+});
+
+ipcMain.handle('get-snooze-status', async (event) => {
+  try {
+    const isSnooze = await preferencesManager.isSnooze();
+    return { success: true, isSnooze };
+  } catch (error) {
+    console.error('Failed to get snooze status:', error);
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
+  }
+});
+
+// Initialize preferences manager
+const preferencesManager = new PreferencesManager();
+
 mb.on('ready', () => {
   console.log('Menubar app is ready');
   setupIPCServer();
+});
+
+// Track window shown for dismissal detection
+mb.on('show', async () => {
+  console.log('Window shown');
+  await preferencesManager.recordWindowShown();
+});
+
+// Track window hidden and check for dismissal
+mb.on('hide', async () => {
+  console.log('Window hidden');
+  await preferencesManager.checkForDismissal();
 });
 
 // Only open dev tools in development

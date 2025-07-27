@@ -9,6 +9,7 @@ export interface MindfulnessPreferences {
   sessionLengthMinutes: number;
   frequency: 'gentle' | 'balanced' | 'intensive';
   enabled: boolean;
+  snoozed: boolean; // Manual override - when true, never show
 }
 
 export interface SessionHistory {
@@ -25,6 +26,8 @@ export interface MindfulnessData {
   preferences: MindfulnessPreferences;
   history: SessionHistory;
   lastSessionTimestamp?: string; // ISO string
+  lastWindowShownAt?: string; // ISO string
+  dismissalTimestamps: string[]; // Array of ISO strings
 }
 
 export class PreferencesManager {
@@ -35,7 +38,8 @@ export class PreferencesManager {
     workHoursEnd: "18:00", 
     sessionLengthMinutes: 3,
     frequency: 'balanced',
-    enabled: true
+    enabled: true,
+    snoozed: false
   };
 
   constructor() {
@@ -56,7 +60,8 @@ export class PreferencesManager {
         // Create default preferences on first run
         const defaultData: MindfulnessData = {
           preferences: { ...this.defaultPreferences },
-          history: {}
+          history: {},
+          dismissalTimestamps: []
         };
         await this.savePreferences(defaultData);
         return defaultData;
@@ -68,12 +73,18 @@ export class PreferencesManager {
       // Merge with defaults in case new preferences were added
       data.preferences = { ...this.defaultPreferences, ...data.preferences };
       
+      // Ensure dismissalTimestamps exists for older data files
+      if (!data.dismissalTimestamps) {
+        data.dismissalTimestamps = [];
+      }
+      
       return data;
     } catch (error) {
       console.error('Failed to load preferences:', error);
       return {
         preferences: { ...this.defaultPreferences },
-        history: {}
+        history: {},
+        dismissalTimestamps: []
       };
     }
   }
@@ -126,6 +137,11 @@ export class PreferencesManager {
         return false;
       }
 
+      // Check if snoozed (manual override)
+      if (preferences.snoozed) {
+        return false;
+      }
+
       const now = new Date();
       
       // Check if within work hours
@@ -149,6 +165,17 @@ export class PreferencesManager {
       
       if (todayMinutes >= preferences.dailyGoalMinutes) {
         return false; // Goal already achieved
+      }
+
+      // Check dismissal backoff - Option A: 2 dismissals in 30min → 2 hour cooldown
+      const dismissalsLast30Min = this.getRecentDismissalsFromData(data, 30);
+      if (dismissalsLast30Min.length >= 2) {
+        const latestDismissal = new Date(Math.max(...dismissalsLast30Min.map(d => new Date(d).getTime())));
+        const hoursSinceLatest = (now.getTime() - latestDismissal.getTime()) / (1000 * 60 * 60);
+        
+        if (hoursSinceLatest < 2) {
+          return false; // Still in 2-hour backoff period
+        }
       }
 
       // Calculate probability based on remaining time and goal
@@ -211,5 +238,57 @@ export class PreferencesManager {
       goal,
       percentage: Math.min(100, Math.round((completed / goal) * 100))
     };
+  }
+
+  async recordWindowShown(): Promise<void> {
+    const data = await this.loadPreferences();
+    data.lastWindowShownAt = new Date().toISOString();
+    await this.savePreferences(data);
+  }
+
+  async checkForDismissal(): Promise<void> {
+    const data = await this.loadPreferences();
+    const { lastWindowShownAt, lastSessionTimestamp } = data;
+    
+    if (!lastWindowShownAt) {
+      return; // No window shown to dismiss
+    }
+
+    const shownTime = new Date(lastWindowShownAt);
+    const lastSession = lastSessionTimestamp ? new Date(lastSessionTimestamp) : null;
+    
+    // If no session started since window was shown = dismissal
+    if (!lastSession || lastSession < shownTime) {
+      // Record dismissal
+      data.dismissalTimestamps.push(new Date().toISOString());
+      
+      // Keep only last 24 hours of dismissals
+      const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
+      data.dismissalTimestamps = data.dismissalTimestamps.filter(
+        timestamp => new Date(timestamp) > oneDayAgo
+      );
+      
+      // Clear the shown timestamp
+      delete data.lastWindowShownAt;
+      
+      await this.savePreferences(data);
+    }
+  }
+
+  private getRecentDismissalsFromData(data: MindfulnessData, minutesBack: number): string[] {
+    const cutoffTime = new Date(Date.now() - minutesBack * 60 * 1000);
+    return data.dismissalTimestamps.filter(timestamp => new Date(timestamp) > cutoffTime);
+  }
+
+  async toggleSnooze(): Promise<boolean> {
+    const data = await this.loadPreferences();
+    data.preferences.snoozed = !data.preferences.snoozed;
+    await this.savePreferences(data);
+    return data.preferences.snoozed;
+  }
+
+  async isSnooze(): Promise<boolean> {
+    const data = await this.loadPreferences();
+    return data.preferences.snoozed;
   }
 }

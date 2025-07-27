@@ -15,6 +15,9 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
     // Daily sessions persistence
     saveDailySessions: (sessions) => electron_1.ipcRenderer.invoke('save-daily-sessions', sessions),
     loadDailySessions: () => electron_1.ipcRenderer.invoke('load-daily-sessions'),
+    // Snooze functionality
+    toggleSnooze: () => electron_1.ipcRenderer.invoke('toggle-snooze'),
+    getSnoozeStatus: () => electron_1.ipcRenderer.invoke('get-snooze-status'),
     // App control
     quitApp: () => electron_1.ipcRenderer.invoke('quit-app')
 });

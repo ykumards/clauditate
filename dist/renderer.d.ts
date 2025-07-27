@@ -40,6 +40,7 @@ declare class BreathingApp {
     private stopBtn;
     private cycleButtons;
     private settingsIcon;
+    private snoozeIcon;
     private backIcon;
     private breatheContainer;
     private settingsContainer;
@@ -84,6 +85,9 @@ declare class BreathingApp {
     private saveStats;
     private showSettings;
     private hideSettings;
+    private handleSnooze;
+    private loadSnoozeStatus;
+    private updateSnoozeIcon;
     private handleCycleChange;
     private saveSettings;
     private loadSettings;
