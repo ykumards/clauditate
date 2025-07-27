@@ -8,9 +8,35 @@
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: {
-                        'dark-primary': '#1a1a2e',
-                        'dark-secondary': '#16213e',
+                    animation: {
+                        'breathe-in': 'breatheIn 5s cubic-bezier(0.4, 0, 0.6, 1)',
+                        'breathe-out': 'breatheOut 5s cubic-bezier(0.4, 0, 0.6, 1)',
+                        'glow': 'glow 5s ease-in-out',
+                        'glow-reverse': 'glow 5s ease-in-out reverse',
+                        'confetti-fall': 'confettiFall 3s ease-in-out forwards',
+                        'fade-in': 'fadeIn 0.3s ease-out'
+                    },
+                    keyframes: {
+                        breatheIn: {
+                            '0%': { width: '40px', height: '40px', opacity: '0.5' },
+                            '100%': { width: '160px', height: '160px', opacity: '0.9' }
+                        },
+                        breatheOut: {
+                            '0%': { width: '160px', height: '160px', opacity: '0.9' },
+                            '100%': { width: '40px', height: '40px', opacity: '0.5' }
+                        },
+                        glow: {
+                            '0%, 100%': { opacity: '0.3', transform: 'translate(-50%, -50%) scale(0.8)' },
+                            '50%': { opacity: '0.8', transform: 'translate(-50%, -50%) scale(1.2)' }
+                        },
+                        confettiFall: {
+                            '0%': { transform: 'translateY(-100vh) rotate(0deg)', opacity: '1' },
+                            '100%': { transform: 'translateY(100vh) rotate(720deg)', opacity: '0' }
+                        },
+                        fadeIn: {
+                            '0%': { opacity: '0', transform: 'scale(0.9)' },
+                            '100%': { opacity: '1', transform: 'scale(1)' }
+                        }
                     }
                 }
             }
@@ -21,538 +47,79 @@
             margin: 0;
             padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Text", "SF Pro Display", "Helvetica Neue", Helvetica, Arial, sans-serif;
-            background: #0a0a0b;
-            color: white;
-            user-select: none;
-            overflow: hidden;
-            width: 300px;
-            height: 450px;
             font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
         
-        .container {
-            text-align: center;
-            width: 300px;
-            height: 450px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-            padding: 25px 0;
-            box-sizing: border-box;
-        }
-        
-        .breathe-container {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            flex: 1;
-            justify-content: center;
-        }
-        
-        .breathe-visual {
-            width: 160px;
-            height: 160px;
-            position: relative;
-            margin: 30px auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .circle-container {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-        }
-        
+        /* Essential animations for breathing circles */
         .breath-circle {
             position: absolute;
-            border-radius: 50%;
-            border: 1px solid rgba(255,255,255,0.08);
-            background: radial-gradient(circle, rgba(255,255,255,0.02) 0%, transparent 70%);
-            transition: all 5s cubic-bezier(0.4, 0.0, 0.6, 1);
-            backdrop-filter: blur(1px);
-        }
-        
-        .breath-circle:nth-child(1) {
-            width: 60px;
-            height: 60px;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
+            transition: all 5s cubic-bezier(0.4, 0, 0.6, 1);
         }
         
-        .breath-circle:nth-child(2) {
-            width: 80px;
-            height: 80px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0.7;
-            animation-delay: 0.3s;
+        .breath-circle-1 { width: 40px; height: 40px; }
+        .breath-circle-2 { width: 60px; height: 60px; opacity: 0.7; }
+        .breath-circle-3 { width: 80px; height: 80px; opacity: 0.5; }
+        .breath-circle-4 { width: 100px; height: 100px; opacity: 0.3; }
+        .breath-circle-5 { width: 120px; height: 120px; opacity: 0.2; }
+        
+        /* Breathing in state */
+        .breathing-in .breath-circle-1 { width: 80px; height: 80px; opacity: 0.9; }
+        .breathing-in .breath-circle-2 { width: 110px; height: 110px; opacity: 0.7; }
+        .breathing-in .breath-circle-3 { width: 140px; height: 140px; opacity: 0.5; }
+        .breathing-in .breath-circle-4 { width: 170px; height: 170px; opacity: 0.3; }
+        .breathing-in .breath-circle-5 { width: 200px; height: 200px; opacity: 0.15; }
+        
+        /* Breathing out state */
+        .breathing-out .breath-circle-1 { width: 20px; height: 20px; opacity: 0.4; }
+        .breathing-out .breath-circle-2 { width: 35px; height: 35px; opacity: 0.3; }
+        .breathing-out .breath-circle-3 { width: 50px; height: 50px; opacity: 0.2; }
+        .breathing-out .breath-circle-4 { width: 65px; height: 65px; opacity: 0.1; }
+        .breathing-out .breath-circle-5 { width: 80px; height: 80px; opacity: 0.05; }
+        
+        .breathing-in .center-dot {
+            animation: glow 5s ease-in-out;
         }
         
-        .breath-circle:nth-child(3) {
-            width: 100px;
-            height: 100px;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            opacity: 0.5;
-            animation-delay: 0.6s;
+        .breathing-out .center-dot {
+            animation: glow 5s ease-in-out reverse;
         }
         
-        .center-dot {
-            width: 6px;
-            height: 6px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 50%;
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            z-index: 10;
-            box-shadow: 0 0 12px rgba(255,255,255,0.3);
-        }
-        
-        /* Breathing animations */
-        .breathing-in .breath-circle:nth-child(1) {
-            width: 6rem !important;
-            height: 6rem !important;
-            opacity: 0.9;
-        }
-        
-        .breathing-in .breath-circle:nth-child(2) {
-            width: 8rem !important;
-            height: 8rem !important;
-            opacity: 0.6;
-        }
-        
-        .breathing-in .breath-circle:nth-child(3) {
-            width: 10rem !important;
-            height: 10rem !important;
-            opacity: 0.3;
-        }
-        
-        .breathing-out .breath-circle:nth-child(1) {
-            width: 3rem !important;
-            height: 3rem !important;
-            opacity: 0.3;
-        }
-        
-        .breathing-out .breath-circle:nth-child(2) {
-            width: 4.5rem !important;
-            height: 4.5rem !important;
-            opacity: 0.2;
-        }
-        
-        .breathing-out .breath-circle:nth-child(3) {
-            width: 6rem !important;
-            height: 6rem !important;
-            opacity: 0.1;
-        }
-        
-        .instruction {
-            font-size: 20px;
-            font-weight: 400;
-            margin: 15px 0 25px 0;
-            opacity: 0.85;
-            transition: all 0.3s ease;
-            letter-spacing: 0.1px;
-            color: rgba(255,255,255,0.9);
-        }
-        
-        .cycle-info {
-            font-size: 14px;
-            opacity: 0.6;
-            margin: 0 0 10px 0;
-            font-weight: 400;
-        }
-        
-        .cycle-selector {
-            display: flex;
-            gap: 10px;
-            margin: 0;
-            justify-content: center;
-            margin-top: auto;
-        }
-        
-        .cycle-btn {
-            width: 44px;
-            height: 44px;
-            border: 2px solid rgba(255,255,255,0.15);
-            background: rgba(255,255,255,0.02);
-            color: rgba(255,255,255,0.6);
-            border-radius: 50%;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 400;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: 0;
-        }
-        
-        .cycle-btn.active {
-            background: rgba(255,255,255,0.08);
-            border-color: #4F9EFF;
-            color: rgba(255,255,255,0.95);
-        }
-        
-        .cycle-btn:hover {
-            background: rgba(255,255,255,0.04);
-            border-color: rgba(255,255,255,0.25);
-            color: rgba(255,255,255,0.8);
-        }
-        
-        .controls {
-            display: flex;
-            justify-content: center;
-            margin: 15px 0;
-        }
-        
-        button.main-btn {
-            padding: 12px 48px;
-            border: none;
-            border-radius: 24px;
-            font-size: 15px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            background: rgba(255,255,255,0.08);
-            color: rgba(255,255,255,0.9);
-            backdrop-filter: blur(10px);
-            letter-spacing: -0.1px;
-        }
-        
-        button.main-btn:hover {
-            background: rgba(255,255,255,0.12);
-            transform: translateY(-1px);
-            box-shadow: 0 8px 24px rgba(0,0,0,0.4);
-        }
-        
-        button.main-btn:active {
-            transform: translateY(0);
-            background: rgba(255,255,255,0.1);
-        }
-        
-        .stats {
-            background: rgba(30,41,59,0.4);
-            border-radius: 12px;
-            padding: 10px 16px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(147,197,253,0.1);
-            display: none;
-        }
-        
-        .stat-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 4px 0;
-            font-size: 11px;
-            opacity: 0.8;
-            font-weight: 400;
-        }
-        
-        .header {
-            position: relative;
-            height: 30px;
-            display: flex;
-            justify-content: flex-end;
-            align-items: center;
-            padding: 0 15px;
-        }
-        
-        .settings-icon {
-            font-size: 18px;
-            cursor: pointer;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-        }
-        
-        .settings-icon:hover {
-            opacity: 1;
-        }
-        
-        .settings-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 300px;
-            height: 450px;
-            background: #0a0a0b;
-            box-sizing: border-box;
-            z-index: 100;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-        
-        .settings-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px;
-            flex-shrink: 0;
-        }
-        
-        .settings-header h2 {
-            margin: 0;
-            font-size: 14px;
-            font-weight: 500;
-            color: rgba(255,255,255,0.9);
-            letter-spacing: -0.2px;
-        }
-        
-        .back-icon {
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            cursor: pointer;
-            opacity: 0.6;
-            transition: all 0.2s;
-            border-radius: 8px;
-            background: rgba(255,255,255,0.04);
-        }
-        
-        .back-icon:hover {
-            opacity: 1;
-            background: rgba(255,255,255,0.08);
-        }
-        
-        .settings-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0 15px 15px;
-        }
-        
-        .settings-content::-webkit-scrollbar {
+        /* Scrollbar styling */
+        .custom-scrollbar::-webkit-scrollbar {
             width: 3px;
         }
         
-        .settings-content::-webkit-scrollbar-track {
+        .custom-scrollbar::-webkit-scrollbar-track {
             background: transparent;
         }
         
-        .settings-content::-webkit-scrollbar-thumb {
+        .custom-scrollbar::-webkit-scrollbar-thumb {
             background: rgba(255,255,255,0.1);
             border-radius: 3px;
         }
         
-        .setting-group {
-            background: rgba(255,255,255,0.03);
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 10px;
-            border: 1px solid rgba(255,255,255,0.05);
-            transition: all 0.2s;
-        }
-        
-        .setting-group:hover {
-            background: rgba(255,255,255,0.04);
-            border-color: rgba(255,255,255,0.08);
-        }
-        
-        .setting-group label {
-            display: block;
-            font-size: 13px;
-            font-weight: 400;
-            margin-bottom: 12px;
-            color: rgba(255,255,255,0.65);
-            letter-spacing: 0;
-        }
-        
-        .radio-group {
-            display: flex;
-            justify-content: space-between;
-            gap: 6px;
-            margin: 0;
-        }
-        
-        
-        .radio-group input[type="radio"] {
-            display: none;
-        }
-        
-        .cycle-option, .target-option, .freq-option {
-            width: 44px;
-            height: 44px;
-            background: rgba(255,255,255,0.02);
-            color: rgba(255,255,255,0.6);
-            border-radius: 50%;
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-            font-weight: 400;
-            border: 2px solid rgba(255,255,255,0.15);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            letter-spacing: 0;
-            margin: 0 auto;
-        }
-        
-        input[type="radio"]:checked + .cycle-option,
-        input[type="radio"]:checked + .target-option,
-        input[type="radio"]:checked + .freq-option {
-            background: rgba(255,255,255,0.08);
+        /* Radio button active states using CSS */
+        input[type="radio"]:checked + div {
+            background-color: rgba(255,255,255,0.08);
             border-color: #4F9EFF;
             color: rgba(255,255,255,0.95);
         }
         
-        .cycle-option:hover, .target-option:hover, .freq-option:hover {
-            background: rgba(255,255,255,0.04);
-            border-color: rgba(255,255,255,0.25);
-            color: rgba(255,255,255,0.8);
-        }
-        
-        .setting-toggle {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .setting-toggle input[type="checkbox"] {
-            appearance: none;
-            width: 36px;
-            height: 20px;
-            background: rgba(255,255,255,0.08);
-            border-radius: 10px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .setting-toggle input[type="checkbox"]:checked {
-            background: rgba(255,255,255,0.15);
-            border-color: rgba(255,255,255,0.2);
-        }
-        
-        .setting-toggle input[type="checkbox"]::after {
-            content: '';
-            position: absolute;
-            width: 14px;
-            height: 14px;
-            background: rgba(255,255,255,0.9);
-            border-radius: 7px;
-            top: 2px;
-            left: 2px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-        }
-        
-        .setting-toggle input[type="checkbox"]:checked::after {
-            transform: translateX(16px);
-            background: white;
-        }
-        
-        .setting-toggle span {
-            font-size: 13px;
-            font-weight: 400;
-            color: rgba(255,255,255,0.65);
-            letter-spacing: 0;
-        }
-        
-        select {
-            appearance: none;
-            background: rgba(255,255,255,0.02);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 8px;
-            padding: 8px 28px 8px 12px;
-            color: rgba(255,255,255,0.85);
-            font-size: 13px;
-            font-weight: 400;
-            cursor: pointer;
-            transition: all 0.2s;
-            background-image: url("data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            letter-spacing: 0;
-        }
-        
-        select:hover {
-            background-color: rgba(255,255,255,0.04);
-            border-color: rgba(255,255,255,0.1);
-        }
-        
-        select:focus {
-            outline: none;
-            border-color: rgba(255,255,255,0.2);
-            background-color: rgba(255,255,255,0.05);
-        }
-        
-        select option {
-            background: #0a0a0b;
-            color: rgba(255,255,255,0.9);
-        }
-        
-        /* Confetti Animation */
-        .confetti-piece {
-            position: absolute;
-            width: 8px;
-            height: 8px;
-            background: linear-gradient(45deg, #3b82f6, #60a5fa);
-            animation: confetti-fall 3s ease-in-out forwards;
-            opacity: 0.8;
-        }
-        
-        .confetti-piece:nth-child(2n) {
-            background: linear-gradient(45deg, #8b5cf6, #a78bfa);
-            width: 6px;
-            height: 6px;
-            animation-delay: 0.1s;
-        }
-        
-        .confetti-piece:nth-child(3n) {
-            background: linear-gradient(45deg, #06b6d4, #67e8f9);
-            width: 10px;
-            height: 4px;
-            animation-delay: 0.2s;
-        }
-        
-        .confetti-piece:nth-child(4n) {
-            background: linear-gradient(45deg, #10b981, #6ee7b7);
-            width: 4px;
-            height: 10px;
-            animation-delay: 0.15s;
-        }
-        
-        @keyframes confetti-fall {
-            0% {
-                transform: translateY(-100vh) rotate(0deg);
-                opacity: 1;
-            }
-            100% {
-                transform: translateY(100vh) rotate(720deg);
-                opacity: 0;
-            }
-        }
-        
-        .completion-overlay {
-            animation: fadeIn 0.3s ease-out;
-        }
-        
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
+        /* Cycle button active state */
+        .cycle-btn.active {
+            background-color: rgba(255,255,255,0.08);
+            border-color: #4F9EFF;
+            color: rgba(255,255,255,0.95);
         }
     </style>
 </head>
-<body>
-    <div class="w-full h-full flex flex-col bg-[#0a0a0b]">
+<body class="bg-[#0a0a0b] text-white select-none overflow-hidden w-[300px] h-[450px]">
+    <div class="w-full h-full flex flex-col">
         <!-- Header -->
         <div class="flex justify-between items-center px-5 py-4">
             <div class="text-white/80 text-sm font-medium tracking-tight" id="cycleInfo">5 breaths</div>
@@ -582,33 +149,35 @@
             <!-- Breathing Visual -->
             <div class="relative w-40 h-40 mb-8" id="breatheVisual">
                 <div class="absolute inset-0 flex items-center justify-center">
-                    <div class="breath-circle absolute w-16 h-16 rounded-full"></div>
-                    <div class="breath-circle absolute w-20 h-20 rounded-full"></div>
-                    <div class="breath-circle absolute w-24 h-24 rounded-full"></div>
-                    <div class="center-dot"></div>
+                    <div class="breath-circle breath-circle-1 rounded-full border border-blue-400/15 bg-gradient-radial from-blue-400/5 to-transparent shadow-[0_0_20px_rgba(79,158,255,0.1)] shadow-[inset_0_0_20px_rgba(79,158,255,0.05)]"></div>
+                    <div class="breath-circle breath-circle-2 rounded-full border border-blue-400/15 bg-gradient-radial from-blue-400/5 to-transparent"></div>
+                    <div class="breath-circle breath-circle-3 rounded-full border border-blue-400/15 bg-gradient-radial from-blue-400/5 to-transparent"></div>
+                    <div class="breath-circle breath-circle-4 rounded-full border border-blue-400/15 bg-gradient-radial from-blue-400/5 to-transparent"></div>
+                    <div class="breath-circle breath-circle-5 rounded-full border border-blue-400/15 bg-gradient-radial from-blue-400/5 to-transparent"></div>
+                    <div class="center-dot absolute w-2 h-2 bg-white/80 rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-10 shadow-[0_0_20px_rgba(255,255,255,0.6)] shadow-[0_0_40px_rgba(79,158,255,0.4)]"></div>
                 </div>
             </div>
             
             <!-- Instruction -->
-            <div class="text-white text-xl font-light mb-8" id="instruction">Breathe</div>
+            <div class="text-white text-xl font-light mb-8 opacity-85 tracking-[0.1px]" id="instruction"></div>
             
             <!-- Cycle Selector -->
             <div class="grid grid-cols-4 gap-2 w-full mb-8 max-w-[220px]">
-                <button class="cycle-btn" data-cycles="5">5</button>
-                <button class="cycle-btn" data-cycles="10">10</button>
-                <button class="cycle-btn" data-cycles="20">20</button>
-                <button class="cycle-btn" data-cycles="30">30</button>
+                <button class="cycle-btn w-11 h-11 border-2 border-white/15 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal flex items-center justify-center hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80" data-cycles="5">5</button>
+                <button class="cycle-btn w-11 h-11 border-2 border-white/15 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal flex items-center justify-center hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80" data-cycles="10">10</button>
+                <button class="cycle-btn w-11 h-11 border-2 border-white/15 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal flex items-center justify-center hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80" data-cycles="20">20</button>
+                <button class="cycle-btn w-11 h-11 border-2 border-white/15 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal flex items-center justify-center hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80" data-cycles="30">30</button>
             </div>
             
             <!-- Start/Stop Button -->
-            <button class="main-btn" id="startBtn">Start</button>
-            <button class="main-btn hidden" id="stopBtn" style="background: rgba(239, 68, 68, 0.15); color: rgba(252, 165, 165, 0.9);">Stop</button>
+            <button class="px-12 py-3 border-none rounded-3xl text-[15px] font-medium cursor-pointer transition-all duration-200 bg-white/[0.08] text-white/90 backdrop-blur-[10px] tracking-[-0.1px] hover:bg-white/[0.12] hover:-translate-y-[1px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] active:translate-y-0 active:bg-white/10" id="startBtn">Start</button>
+            <button class="hidden px-12 py-3 border-none rounded-3xl text-[15px] font-medium cursor-pointer transition-all duration-200 backdrop-blur-[10px] tracking-[-0.1px] hover:-translate-y-[1px] hover:shadow-[0_8px_24px_rgba(0,0,0,0.4)] active:translate-y-0" id="stopBtn" style="background: rgba(239, 68, 68, 0.15); color: rgba(252, 165, 165, 0.9);">Stop</button>
         </div>
         
         <!-- Completion Message -->
-        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden" id="completionOverlay">
-            <div class="bg-gradient-to-br from-dark-primary to-dark-secondary p-8 rounded-2xl border border-white/20 text-center max-w-sm mx-4 relative overflow-hidden">
-                <div class="confetti-container absolute inset-0 pointer-events-none" id="confettiContainer"></div>
+        <div class="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 hidden animate-fade-in" id="completionOverlay">
+            <div class="bg-gradient-to-br from-[#1a1a2e] to-[#16213e] p-8 rounded-2xl border border-white/20 text-center max-w-sm mx-4 relative overflow-hidden">
+                <div class="absolute inset-0 pointer-events-none" id="confettiContainer"></div>
                 <div class="relative z-10">
                     <div class="text-4xl mb-4">🎉</div>
                     <h2 class="text-xl font-semibold text-white mb-3">Meditation Complete!</h2>
@@ -621,11 +190,12 @@
         </div>
     </div>
         
-        <div class="settings-container hidden" id="settingsContainer">
+        <!-- Settings Container -->
+        <div class="fixed top-0 left-0 w-[300px] h-[450px] bg-[#0a0a0b] z-[100] flex flex-col overflow-hidden hidden" id="settingsContainer">
             <!-- Header -->
-            <div class="settings-header">
-                <h2>Settings</h2>
-                <button class="back-icon" id="backIcon">
+            <div class="flex justify-between items-center p-[15px] flex-shrink-0">
+                <h2 class="m-0 text-sm font-medium text-white/90 tracking-[-0.2px]">Settings</h2>
+                <button class="w-7 h-7 flex items-center justify-center text-sm cursor-pointer opacity-60 transition-all duration-200 rounded-lg bg-white/[0.04] hover:opacity-100 hover:bg-white/[0.08]" id="backIcon">
                     <svg class="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"></path>
                     </svg>
@@ -633,104 +203,104 @@
             </div>
             
             <!-- Content -->
-            <div class="settings-content">
+            <div class="flex-1 overflow-y-auto px-[15px] pb-[15px] custom-scrollbar">
                 <!-- Daily Target -->
-                <div class="setting-group">
-                    <label>Daily target (minutes)</label>
-                    <div class="radio-group">
+                <div class="bg-white/[0.03] rounded-xl p-3.5 mb-2.5 border border-white/[0.05] transition-all duration-200 hover:bg-white/[0.04] hover:border-white/[0.08]">
+                    <label class="block text-[13px] font-normal mb-3 text-white/65">Daily target (minutes)</label>
+                    <div class="flex justify-between gap-1.5">
                         <label class="relative">
                             <input type="radio" name="dailyTarget" value="5" class="sr-only" id="target5">
-                            <div class="target-option">5</div>
+                            <div class="w-11 h-11 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal border-2 border-white/15 flex items-center justify-center mx-auto hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80">5</div>
                         </label>
                         <label class="relative">
                             <input type="radio" name="dailyTarget" value="10" class="sr-only" id="target10" checked>
-                            <div class="target-option">10</div>
+                            <div class="w-11 h-11 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal border-2 border-white/15 flex items-center justify-center mx-auto hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80">10</div>
                         </label>
                         <label class="relative">
                             <input type="radio" name="dailyTarget" value="15" class="sr-only" id="target15">
-                            <div class="target-option">15</div>
+                            <div class="w-11 h-11 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal border-2 border-white/15 flex items-center justify-center mx-auto hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80">15</div>
                         </label>
                         <label class="relative">
                             <input type="radio" name="dailyTarget" value="20" class="sr-only" id="target20">
-                            <div class="target-option">20</div>
+                            <div class="w-11 h-11 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal border-2 border-white/15 flex items-center justify-center mx-auto hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80">20</div>
                         </label>
                     </div>
                 </div>
                 
                 <!-- Default Cycle Count -->
-                <div class="setting-group">
-                    <label>Default cycles</label>
-                    <div class="radio-group">
+                <div class="bg-white/[0.03] rounded-xl p-3.5 mb-2.5 border border-white/[0.05] transition-all duration-200 hover:bg-white/[0.04] hover:border-white/[0.08]">
+                    <label class="block text-[13px] font-normal mb-3 text-white/65">Default cycles</label>
+                    <div class="flex justify-between gap-1.5">
                         <label class="relative">
                             <input type="radio" name="cycles" value="5" class="sr-only" id="cycles5">
-                            <div class="cycle-option">5</div>
+                            <div class="w-11 h-11 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal border-2 border-white/15 flex items-center justify-center mx-auto hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80">5</div>
                         </label>
                         <label class="relative">
                             <input type="radio" name="cycles" value="10" class="sr-only" id="cycles10" checked>
-                            <div class="cycle-option">10</div>
+                            <div class="w-11 h-11 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal border-2 border-white/15 flex items-center justify-center mx-auto hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80">10</div>
                         </label>
                         <label class="relative">
                             <input type="radio" name="cycles" value="20" class="sr-only" id="cycles20">
-                            <div class="cycle-option">20</div>
+                            <div class="w-11 h-11 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal border-2 border-white/15 flex items-center justify-center mx-auto hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80">20</div>
                         </label>
                         <label class="relative">
                             <input type="radio" name="cycles" value="30" class="sr-only" id="cycles30">
-                            <div class="cycle-option">30</div>
+                            <div class="w-11 h-11 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal border-2 border-white/15 flex items-center justify-center mx-auto hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80">30</div>
                         </label>
                     </div>
                 </div>
                 
                 <!-- Work Hours -->
-                <div class="setting-group">
-                    <label>Work hours</label>
+                <div class="bg-white/[0.03] rounded-xl p-3.5 mb-2.5 border border-white/[0.05] transition-all duration-200 hover:bg-white/[0.04] hover:border-white/[0.08]">
+                    <label class="block text-[13px] font-normal mb-3 text-white/65">Work hours</label>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-xs text-white/50 mb-2 font-normal">Start</label>
-                            <select class="w-full" id="workHoursStart">
-                                <option value="06:00">6:00 AM</option>
-                                <option value="07:00">7:00 AM</option>
-                                <option value="08:00">8:00 AM</option>
-                                <option value="09:00" selected>9:00 AM</option>
-                                <option value="10:00">10:00 AM</option>
+                            <select class="w-full appearance-none bg-white/[0.02] border border-white/[0.08] rounded-lg px-3 pr-7 py-2 text-white/85 text-[13px] font-normal cursor-pointer transition-all duration-200 hover:bg-white/[0.04] hover:border-white/10 focus:outline-none focus:border-white/20 focus:bg-white/[0.05]" id="workHoursStart" style="background-image: url(&quot;data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 10px center;">
+                                <option value="06:00" class="bg-[#0a0a0b] text-white/90">6:00 AM</option>
+                                <option value="07:00" class="bg-[#0a0a0b] text-white/90">7:00 AM</option>
+                                <option value="08:00" class="bg-[#0a0a0b] text-white/90">8:00 AM</option>
+                                <option value="09:00" selected class="bg-[#0a0a0b] text-white/90">9:00 AM</option>
+                                <option value="10:00" class="bg-[#0a0a0b] text-white/90">10:00 AM</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-xs text-white/50 mb-2 font-normal">End</label>
-                            <select class="w-full" id="workHoursEnd">
-                                <option value="16:00">4:00 PM</option>
-                                <option value="17:00">5:00 PM</option>
-                                <option value="18:00" selected>6:00 PM</option>
-                                <option value="19:00">7:00 PM</option>
-                                <option value="20:00">8:00 PM</option>
+                            <select class="w-full appearance-none bg-white/[0.02] border border-white/[0.08] rounded-lg px-3 pr-7 py-2 text-white/85 text-[13px] font-normal cursor-pointer transition-all duration-200 hover:bg-white/[0.04] hover:border-white/10 focus:outline-none focus:border-white/20 focus:bg-white/[0.05]" id="workHoursEnd" style="background-image: url(&quot;data:image/svg+xml,%3Csvg width='10' height='6' viewBox='0 0 10 6' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1L5 5L9 1' stroke='%23888' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E&quot;); background-repeat: no-repeat; background-position: right 10px center;">
+                                <option value="16:00" class="bg-[#0a0a0b] text-white/90">4:00 PM</option>
+                                <option value="17:00" class="bg-[#0a0a0b] text-white/90">5:00 PM</option>
+                                <option value="18:00" selected class="bg-[#0a0a0b] text-white/90">6:00 PM</option>
+                                <option value="19:00" class="bg-[#0a0a0b] text-white/90">7:00 PM</option>
+                                <option value="20:00" class="bg-[#0a0a0b] text-white/90">8:00 PM</option>
                             </select>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Reminder Frequency -->
-                <div class="setting-group">
-                    <label>Reminder frequency</label>
-                    <div class="radio-group">
+                <div class="bg-white/[0.03] rounded-xl p-3.5 mb-2.5 border border-white/[0.05] transition-all duration-200 hover:bg-white/[0.04] hover:border-white/[0.08]">
+                    <label class="block text-[13px] font-normal mb-3 text-white/65">Reminder frequency</label>
+                    <div class="flex justify-between gap-1.5">
                         <label class="relative">
                             <input type="radio" name="frequency" value="gentle" class="sr-only" id="freqGentle">
-                            <div class="freq-option">Lo</div>
+                            <div class="w-11 h-11 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal border-2 border-white/15 flex items-center justify-center mx-auto hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80">Lo</div>
                         </label>
                         <label class="relative">
                             <input type="radio" name="frequency" value="balanced" class="sr-only" id="freqBalanced" checked>
-                            <div class="freq-option">Med</div>
+                            <div class="w-11 h-11 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal border-2 border-white/15 flex items-center justify-center mx-auto hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80">Med</div>
                         </label>
                         <label class="relative">
                             <input type="radio" name="frequency" value="intensive" class="sr-only" id="freqIntensive">
-                            <div class="freq-option">Hi</div>
+                            <div class="w-11 h-11 bg-white/[0.02] text-white/60 rounded-full text-sm cursor-pointer transition-all duration-200 font-normal border-2 border-white/15 flex items-center justify-center mx-auto hover:bg-white/[0.04] hover:border-white/25 hover:text-white/80">Hi</div>
                         </label>
                     </div>
                 </div>
                 
                 <!-- Notifications -->
-                <div class="setting-group">
-                    <div class="setting-toggle">
-                        <span>Notifications</span>
-                        <input type="checkbox" id="notificationsToggle" checked>
+                <div class="bg-white/[0.03] rounded-xl p-3.5 mb-2.5 border border-white/[0.05] transition-all duration-200 hover:bg-white/[0.04] hover:border-white/[0.08]">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[13px] font-normal text-white/65">Notifications</span>
+                        <input type="checkbox" id="notificationsToggle" checked class="appearance-none w-9 h-5 bg-white/[0.08] rounded-[10px] relative cursor-pointer transition-all duration-300 border border-white/10 checked:bg-white/15 checked:border-white/20 after:content-[''] after:absolute after:w-3.5 after:h-3.5 after:bg-white/90 after:rounded-[7px] after:top-0.5 after:left-0.5 after:transition-all after:duration-300 after:shadow-[0_1px_3px_rgba(0,0,0,0.3)] checked:after:translate-x-4 checked:after:bg-white">
                     </div>
                 </div>
                 
@@ -744,11 +314,11 @@
         </div>
         
         <!-- Insights Container -->
-        <div class="settings-container hidden" id="insightsContainer">
+        <div class="fixed top-0 left-0 w-[300px] h-[450px] bg-[#0a0a0b] z-[100] flex flex-col overflow-hidden hidden" id="insightsContainer">
             <!-- Header -->
-            <div class="settings-header">
-                <h2>Insights</h2>
-                <button class="back-icon" id="insightsBackIcon">
+            <div class="flex justify-between items-center p-[15px] flex-shrink-0">
+                <h2 class="m-0 text-sm font-medium text-white/90 tracking-[-0.2px]">Insights</h2>
+                <button class="w-7 h-7 flex items-center justify-center text-sm cursor-pointer opacity-60 transition-all duration-200 rounded-lg bg-white/[0.04] hover:opacity-100 hover:bg-white/[0.08]" id="insightsBackIcon">
                     <svg class="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"></path>
                     </svg>
@@ -756,27 +326,27 @@
             </div>
             
             <!-- Content -->
-            <div class="settings-content">
+            <div class="flex-1 overflow-y-auto px-[15px] pb-[15px] custom-scrollbar">
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-3 gap-2">
-                    <div class="setting-group text-center py-3">
+                    <div class="bg-white/[0.03] rounded-xl py-3 text-center border border-white/[0.05] transition-all duration-200 hover:bg-white/[0.04] hover:border-white/[0.08]">
                         <div class="text-xl font-medium text-white/90" id="todayMinutes">0</div>
-                        <div class="text-[10px] text-white/50 font-normal mt-0.5">TODAY</div>
+                        <div class="text-[10px] text-white/50 font-normal mt-0.5 whitespace-nowrap">TODAY</div>
                     </div>
-                    <div class="setting-group text-center py-3">
+                    <div class="bg-white/[0.03] rounded-xl py-3 text-center border border-white/[0.05] transition-all duration-200 hover:bg-white/[0.04] hover:border-white/[0.08]">
                         <div class="text-xl font-medium text-white/90" id="weekMinutes">0</div>
-                        <div class="text-[10px] text-white/50 font-normal mt-0.5">WEEK</div>
+                        <div class="text-[10px] text-white/50 font-normal mt-0.5 whitespace-nowrap">WEEK</div>
                     </div>
-                    <div class="setting-group text-center py-3">
+                    <div class="bg-white/[0.03] rounded-xl py-3 text-center border border-white/[0.05] transition-all duration-200 hover:bg-white/[0.04] hover:border-white/[0.08]">
                         <div class="text-xl font-medium text-white/90" id="monthMinutes">0</div>
-                        <div class="text-[10px] text-white/50 font-normal mt-0.5">MONTH</div>
+                        <div class="text-[10px] text-white/50 font-normal mt-0.5 whitespace-nowrap">MONTH</div>
                     </div>
                 </div>
                 
                 <!-- Weekly Chart -->
-                <div class="setting-group">
+                <div class="bg-white/[0.03] rounded-xl p-3.5 mt-2.5 border border-white/[0.05] transition-all duration-200 hover:bg-white/[0.04] hover:border-white/[0.08]">
                     <div class="flex items-center justify-between mb-3">
-                        <label class="!mb-0 text-xs font-medium text-white/70">Weekly Progress</label>
+                        <label class="text-xs font-medium text-white/70">Weekly Progress</label>
                         <div class="flex items-center gap-2">
                             <button class="w-6 h-6 flex items-center justify-center rounded-lg bg-white/[0.03] hover:bg-white/[0.06] transition-all" id="prevWeek">
                                 <svg class="w-3 h-3 text-white/50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -812,7 +382,7 @@
                 </div>
                 
                 <!-- Recent Sessions -->
-                <div class="setting-group">
+                <div class="bg-white/[0.03] rounded-xl p-3.5 mt-2.5 border border-white/[0.05] transition-all duration-200 hover:bg-white/[0.04] hover:border-white/[0.08]">
                     <label class="text-xs font-medium text-white/70 mb-3 block">Recent Sessions</label>
                     <div class="space-y-1.5" id="recentSessions">
                         <!-- Sessions will be populated by JS -->
@@ -821,6 +391,40 @@
             </div>
         </div>
     </div>
+    
+    <!-- Confetti styles -->
+    <style>
+        .confetti-piece {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: linear-gradient(45deg, #3b82f6, #60a5fa);
+            animation: confetti-fall 3s ease-in-out forwards;
+            opacity: 0.8;
+        }
+        
+        .confetti-piece:nth-child(2n) {
+            background: linear-gradient(45deg, #8b5cf6, #a78bfa);
+            width: 6px;
+            height: 6px;
+            animation-delay: 0.1s;
+        }
+        
+        .confetti-piece:nth-child(3n) {
+            background: linear-gradient(45deg, #06b6d4, #67e8f9);
+            width: 10px;
+            height: 4px;
+            animation-delay: 0.2s;
+        }
+        
+        .confetti-piece:nth-child(4n) {
+            background: linear-gradient(45deg, #10b981, #6ee7b7);
+            width: 4px;
+            height: 10px;
+            animation-delay: 0.15s;
+        }
+    </style>
+    
     <script src="dist/renderer.js"></script>
 </body>
 </html>
