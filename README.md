@@ -6,6 +6,8 @@
 
 Clauditate appears automatically when Claude Code is processing, giving you gentle breathing exercises to keep you present instead of letting your mind wander. Simple, unobtrusive, and surprisingly effective at maintaining focus during development.
 
+![Clauditate Screenshot](clauditate_screen.png)
+
 ## Features
 
 - **Automatic Integration**: Appears when Claude Code is thinking, disappears when done
