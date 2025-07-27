@@ -1,6 +1,6 @@
 {
   "name": "clauditate",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Mindful meditation app that integrates with Claude Code for automatic breathing breaks during development",
   "main": "dist/main.js",
   "bin": {
