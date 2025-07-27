@@ -36,6 +36,8 @@ interface ElectronAPI {
   loadDailySessions: () => Promise<DailySessions | null>;
   toggleSnooze: () => Promise<{ success: boolean; isSnooze?: boolean; error?: string }>;
   getSnoozeStatus: () => Promise<{ success: boolean; isSnooze?: boolean; error?: string }>;
+  savePreferences: (preferences: any) => Promise<{ success: boolean; error?: string }>;
+  loadPreferences: () => Promise<{ success: boolean; preferences?: any; error?: string }>;
   quitApp: () => Promise<void>;
 }
 
@@ -69,6 +71,12 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('toggle-snooze'),
   getSnoozeStatus: (): Promise<{ success: boolean; isSnooze?: boolean; error?: string }> => 
     ipcRenderer.invoke('get-snooze-status'),
+  
+  // Preferences
+  savePreferences: (preferences: any): Promise<{ success: boolean; error?: string }> => 
+    ipcRenderer.invoke('save-preferences', preferences),
+  loadPreferences: (): Promise<{ success: boolean; preferences?: any; error?: string }> => 
+    ipcRenderer.invoke('load-preferences'),
   
   // App control
   quitApp: (): Promise<void> => 

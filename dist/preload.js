@@ -18,6 +18,9 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
     // Snooze functionality
     toggleSnooze: () => electron_1.ipcRenderer.invoke('toggle-snooze'),
     getSnoozeStatus: () => electron_1.ipcRenderer.invoke('get-snooze-status'),
+    // Preferences
+    savePreferences: (preferences) => electron_1.ipcRenderer.invoke('save-preferences', preferences),
+    loadPreferences: () => electron_1.ipcRenderer.invoke('load-preferences'),
     // App control
     quitApp: () => electron_1.ipcRenderer.invoke('quit-app')
 });

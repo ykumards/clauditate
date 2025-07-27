@@ -37,6 +37,15 @@ interface ElectronAPI {
         isSnooze?: boolean;
         error?: string;
     }>;
+    savePreferences: (preferences: any) => Promise<{
+        success: boolean;
+        error?: string;
+    }>;
+    loadPreferences: () => Promise<{
+        success: boolean;
+        preferences?: any;
+        error?: string;
+    }>;
     quitApp: () => Promise<void>;
 }
 declare global {

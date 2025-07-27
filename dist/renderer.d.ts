@@ -45,6 +45,10 @@ declare class BreathingApp {
     private breatheContainer;
     private settingsContainer;
     private cycleRadios;
+    private targetRadios;
+    private frequencyRadios;
+    private workHoursStart;
+    private workHoursEnd;
     private notificationsToggle;
     private quitBtn;
     private insightsIcon;
@@ -89,6 +93,10 @@ declare class BreathingApp {
     private loadSnoozeStatus;
     private updateSnoozeIcon;
     private handleCycleChange;
+    private handlePreferenceChange;
+    private savePreferences;
+    private loadPreferences;
+    private updateRadioVisual;
     private saveSettings;
     private loadSettings;
     private updateSettingsUI;

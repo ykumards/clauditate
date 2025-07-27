@@ -55,6 +55,10 @@ class BreathingApp {
   private breatheContainer!: HTMLElement;
   private settingsContainer!: HTMLElement;
   private cycleRadios!: NodeListOf<HTMLInputElement>;
+  private targetRadios!: NodeListOf<HTMLInputElement>;
+  private frequencyRadios!: NodeListOf<HTMLInputElement>;
+  private workHoursStart!: HTMLSelectElement;
+  private workHoursEnd!: HTMLSelectElement;
   private notificationsToggle!: HTMLInputElement;
   private quitBtn!: HTMLButtonElement;
   
@@ -85,6 +89,7 @@ class BreathingApp {
     this.initElements();
     this.initEventListeners();
     await this.loadStats();
+    await this.loadPreferences();
     await this.loadSnoozeStatus();
     this.updateDisplay();
   }
@@ -102,6 +107,10 @@ class BreathingApp {
     this.breatheContainer = this.getElementById('breatheContainer');
     this.settingsContainer = this.getElementById('settingsContainer');
     this.cycleRadios = document.querySelectorAll('input[name="cycles"]') as NodeListOf<HTMLInputElement>;
+    this.targetRadios = document.querySelectorAll('input[name="dailyTarget"]') as NodeListOf<HTMLInputElement>;
+    this.frequencyRadios = document.querySelectorAll('input[name="frequency"]') as NodeListOf<HTMLInputElement>;
+    this.workHoursStart = this.getElementById('workHoursStart') as HTMLSelectElement;
+    this.workHoursEnd = this.getElementById('workHoursEnd') as HTMLSelectElement;
     this.notificationsToggle = this.getElementById('notificationsToggle') as HTMLInputElement;
     this.quitBtn = this.getElementById('quitBtn') as HTMLButtonElement;
     
@@ -161,6 +170,17 @@ class BreathingApp {
       radio.addEventListener('change', (e) => this.handleCycleChange(e));
     });
     
+    this.targetRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => this.handlePreferenceChange(e));
+    });
+    
+    this.frequencyRadios.forEach(radio => {
+      radio.addEventListener('change', (e) => this.handlePreferenceChange(e));
+    });
+    
+    this.workHoursStart.addEventListener('change', (e) => this.handlePreferenceChange(e));
+    this.workHoursEnd.addEventListener('change', (e) => this.handlePreferenceChange(e));
+    
     this.notificationsToggle.addEventListener('change', () => this.saveSettings());
     
     this.quitBtn.addEventListener('click', () => this.quitApp());
@@ -173,9 +193,9 @@ class BreathingApp {
     this.cycleButtons.forEach(btn => {
       const btnCycles = parseInt(btn.dataset.cycles || '5');
       if (btnCycles === cycles) {
-        btn.className = 'cycle-btn h-10 rounded-full border-2 border-blue-500 bg-blue-500/20 text-blue-300 font-medium transition-all hover:bg-blue-500/30 text-sm';
+        btn.classList.add('active');
       } else {
-        btn.className = 'cycle-btn h-10 rounded-full border-2 border-white/20 bg-white/5 text-white/70 font-medium transition-all hover:bg-white/10 text-sm';
+        btn.classList.remove('active');
       }
     });
     this.updateDisplay();
@@ -428,6 +448,65 @@ class BreathingApp {
     this.updateSettingsUI();
     this.saveSettings();
   }
+
+  private handlePreferenceChange(e: Event): void {
+    this.savePreferences();
+  }
+
+  private async savePreferences(): Promise<void> {
+    try {
+      const selectedTarget = document.querySelector('input[name="dailyTarget"]:checked') as HTMLInputElement;
+      const selectedFrequency = document.querySelector('input[name="frequency"]:checked') as HTMLInputElement;
+      
+      const preferences = {
+        dailyGoalMinutes: selectedTarget ? parseInt(selectedTarget.value) : 10,
+        workHoursStart: this.workHoursStart.value,
+        workHoursEnd: this.workHoursEnd.value,
+        frequency: selectedFrequency ? selectedFrequency.value : 'balanced',
+        enabled: this.notificationsToggle.checked
+      };
+
+      await (window as any).electronAPI.savePreferences(preferences);
+    } catch (error) {
+      console.error('Error saving preferences:', error);
+    }
+  }
+
+  private async loadPreferences(): Promise<void> {
+    try {
+      const result = await (window as any).electronAPI.loadPreferences();
+      if (result.success && result.preferences) {
+        const prefs = result.preferences;
+        
+        // Set daily target
+        const targetRadio = document.querySelector(`input[name="dailyTarget"][value="${prefs.dailyGoalMinutes}"]`) as HTMLInputElement;
+        if (targetRadio) {
+          targetRadio.checked = true;
+          this.updateRadioVisual('target-option', targetRadio);
+        }
+        
+        // Set frequency
+        const freqRadio = document.querySelector(`input[name="frequency"][value="${prefs.frequency}"]`) as HTMLInputElement;
+        if (freqRadio) {
+          freqRadio.checked = true;
+          this.updateRadioVisual('freq-option', freqRadio);
+        }
+        
+        // Set work hours
+        this.workHoursStart.value = prefs.workHoursStart || '09:00';
+        this.workHoursEnd.value = prefs.workHoursEnd || '18:00';
+        
+        // Set notifications toggle
+        this.notificationsToggle.checked = prefs.enabled !== false;
+      }
+    } catch (error) {
+      console.error('Error loading preferences:', error);
+    }
+  }
+
+  private updateRadioVisual(className: string, radio: HTMLInputElement): void {
+    // CSS handles the styling via :checked pseudo-selector, no need to manually update
+  }
   
   private async saveSettings(): Promise<void> {
     const settings: SettingsData = {
@@ -470,13 +549,9 @@ class BreathingApp {
     this.cycleRadios.forEach(radio => {
       radio.checked = parseInt(radio.value) === this.totalCycles;
       
-      // Update visual appearance
+      // Update visual appearance - let CSS handle styling
       const cycleOption = radio.nextElementSibling as HTMLElement;
-      if (radio.checked) {
-        cycleOption.className = 'cycle-option w-full h-12 bg-blue-500/20 border-2 border-blue-500 rounded-full flex items-center justify-center text-blue-300 font-medium cursor-pointer transition-all hover:bg-white/10';
-      } else {
-        cycleOption.className = 'cycle-option w-full h-12 bg-white/5 border-2 border-transparent rounded-full flex items-center justify-center text-white/70 font-medium cursor-pointer transition-all hover:bg-white/10';
-      }
+      // Just use the base CSS classes, don't override
     });
     
     this.selectCycles(this.totalCycles);
@@ -603,9 +678,18 @@ class BreathingApp {
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekStart.getDate() + 6);
     
-    // Update week range display
-    const options: Intl.DateTimeFormatOptions = { month: 'short', day: 'numeric' };
-    this.weekRange.textContent = `${weekStart.toLocaleDateString('en-US', options)} - ${weekEnd.toLocaleDateString('en-US', options)}`;
+    // Update week range display - compact format
+    const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const startMonth = monthNames[weekStart.getMonth()];
+    const endMonth = monthNames[weekEnd.getMonth()];
+    const startDay = weekStart.getDate();
+    const endDay = weekEnd.getDate();
+    
+    if (startMonth === endMonth) {
+      this.weekRange.textContent = `${startMonth} ${startDay}-${endDay}`;
+    } else {
+      this.weekRange.textContent = `${startMonth} ${startDay} - ${endMonth} ${endDay}`;
+    }
     
     // Clear chart
     this.weeklyChart.innerHTML = '';
@@ -623,12 +707,23 @@ class BreathingApp {
       maxMinutes = Math.max(maxMinutes, minutes);
     }
     
+    // Check if there's any data
+    const hasData = weekData.some(minutes => minutes > 0);
+    
+    if (!hasData) {
+      // Show empty state
+      const emptyState = document.createElement('div');
+      emptyState.className = 'absolute inset-0 flex items-center justify-center';
+      emptyState.innerHTML = `<div class="text-white/20 text-[10px]">No data</div>`;
+      this.weeklyChart.appendChild(emptyState);
+    }
+    
     // Render bars
     weekData.forEach(minutes => {
       const bar = document.createElement('div');
       const height = maxMinutes > 0 ? (minutes / maxMinutes) * 100 : 0;
-      bar.className = 'flex-1 bg-blue-500/60 rounded-t transition-all hover:bg-blue-500/80';
-      bar.style.height = `${Math.max(height, 2)}%`; // Minimum 2% height for visibility
+      bar.className = 'flex-1 bg-blue-600 rounded-t-md transition-all hover:bg-blue-500';
+      bar.style.height = hasData ? `${Math.max(height, 2)}%` : '2px'; // Only show if there's data
       bar.title = `${minutes} minutes`;
       this.weeklyChart.appendChild(bar);
     });
@@ -653,22 +748,22 @@ class BreathingApp {
     // Show last 5 sessions
     allSessions.slice(0, 5).forEach(session => {
       const sessionEl = document.createElement('div');
-      sessionEl.className = 'flex justify-between items-center text-sm';
+      sessionEl.className = 'flex justify-between items-center';
       
       const date = new Date(session.date);
       const isToday = session.date === new Date().toISOString().split('T')[0];
       const dateStr = isToday ? 'Today' : date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
       
       sessionEl.innerHTML = `
-        <span class="text-white/70">${dateStr}</span>
-        <span class="text-blue-400">${session.minutes}min • ${session.cycles} cycles</span>
+        <span class="text-white/50 text-[11px]">${dateStr}</span>
+        <span class="text-white/70 text-[11px]">${session.minutes}min • ${session.cycles}c</span>
       `;
       
       this.recentSessions.appendChild(sessionEl);
     });
     
     if (allSessions.length === 0) {
-      this.recentSessions.innerHTML = '<div class="text-white/50 text-sm text-center">No sessions yet</div>';
+      this.recentSessions.innerHTML = '<div class="text-white/30 text-[11px] text-center">No sessions yet</div>';
     }
   }
   

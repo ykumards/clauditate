@@ -41,9 +41,9 @@ const net = __importStar(require("net"));
 const os = __importStar(require("os"));
 const preferences_1 = require("./preferences");
 const mb = (0, menubar_1.menubar)({
-    index: `file://${path.join(__dirname, '../index.html')}`,
-    icon: '☯',
-    tooltip: 'Breathe - Meditation',
+    index: `file://${path.join(__dirname, "../index.html")}`,
+    icon: "☯",
+    tooltip: "Breathe - Meditation",
     showDockIcon: false,
     browserWindow: {
         width: 300,
@@ -53,25 +53,25 @@ const mb = (0, menubar_1.menubar)({
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true,
-            preload: path.join(__dirname, 'preload.js')
-        }
-    }
+            preload: path.join(__dirname, "preload.js"),
+        },
+    },
 });
 // Data storage path
-const userDataPath = electron_1.app.getPath('userData');
-const settingsPath = path.join(userDataPath, 'settings.json');
-const statsPath = path.join(userDataPath, 'stats.json');
-const dailySessionsPath = path.join(userDataPath, 'dailySessions.json');
+const userDataPath = electron_1.app.getPath("userData");
+const settingsPath = path.join(userDataPath, "settings.json");
+const statsPath = path.join(userDataPath, "stats.json");
+const dailySessionsPath = path.join(userDataPath, "dailySessions.json");
 // Helper functions for file operations
 const readJsonFile = (filePath) => {
     try {
         if (fs.existsSync(filePath)) {
-            const data = fs.readFileSync(filePath, 'utf8');
+            const data = fs.readFileSync(filePath, "utf8");
             return JSON.parse(data);
         }
     }
     catch (error) {
-        console.error('Error reading file:', error);
+        console.error("Error reading file:", error);
     }
     return null;
 };
@@ -81,89 +81,121 @@ const writeJsonFile = (filePath, data) => {
         return true;
     }
     catch (error) {
-        console.error('Error writing file:', error);
+        console.error("Error writing file:", error);
         return false;
     }
 };
 // IPC handlers
-electron_1.ipcMain.handle('show-notification', async (event, { title, body }) => {
+electron_1.ipcMain.handle("show-notification", async (event, { title, body }) => {
     if (electron_1.Notification.isSupported()) {
         new electron_1.Notification({
             title,
             body,
-            icon: path.join(__dirname, '../assets/icon.png'),
-            silent: false
+            icon: path.join(__dirname, "../assets/icon.png"),
+            silent: false,
         }).show();
     }
 });
-electron_1.ipcMain.handle('save-settings', async (event, settings) => {
+electron_1.ipcMain.handle("save-settings", async (event, settings) => {
     return writeJsonFile(settingsPath, settings);
 });
-electron_1.ipcMain.handle('load-settings', async (event) => {
+electron_1.ipcMain.handle("load-settings", async (event) => {
     return readJsonFile(settingsPath);
 });
-electron_1.ipcMain.handle('save-stats', async (event, stats) => {
+electron_1.ipcMain.handle("save-stats", async (event, stats) => {
     return writeJsonFile(statsPath, stats);
 });
-electron_1.ipcMain.handle('load-stats', async (event) => {
+electron_1.ipcMain.handle("load-stats", async (event) => {
     return readJsonFile(statsPath);
 });
-electron_1.ipcMain.handle('save-daily-sessions', async (event, sessions) => {
+electron_1.ipcMain.handle("save-daily-sessions", async (event, sessions) => {
     return writeJsonFile(dailySessionsPath, sessions);
 });
-electron_1.ipcMain.handle('load-daily-sessions', async (event) => {
+electron_1.ipcMain.handle("load-daily-sessions", async (event) => {
     return readJsonFile(dailySessionsPath);
 });
-electron_1.ipcMain.handle('quit-app', async (event) => {
+electron_1.ipcMain.handle("quit-app", async (event) => {
     electron_1.app.quit();
 });
-electron_1.ipcMain.handle('toggle-snooze', async (event) => {
+electron_1.ipcMain.handle("toggle-snooze", async (event) => {
     try {
         const isSnooze = await preferencesManager.toggleSnooze();
         return { success: true, isSnooze };
     }
     catch (error) {
-        console.error('Failed to toggle snooze:', error);
-        return { success: false, error: error instanceof Error ? error.message : String(error) };
+        console.error("Failed to toggle snooze:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : String(error),
+        };
     }
 });
-electron_1.ipcMain.handle('get-snooze-status', async (event) => {
+electron_1.ipcMain.handle("get-snooze-status", async (event) => {
     try {
         const isSnooze = await preferencesManager.isSnooze();
         return { success: true, isSnooze };
     }
     catch (error) {
-        console.error('Failed to get snooze status:', error);
-        return { success: false, error: error instanceof Error ? error.message : String(error) };
+        console.error("Failed to get snooze status:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : String(error),
+        };
+    }
+});
+electron_1.ipcMain.handle("save-preferences", async (event, preferences) => {
+    try {
+        await preferencesManager.updatePreferences(preferences);
+        return { success: true };
+    }
+    catch (error) {
+        console.error("Failed to save preferences:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : String(error),
+        };
+    }
+});
+electron_1.ipcMain.handle("load-preferences", async (event) => {
+    try {
+        const data = await preferencesManager.loadPreferences();
+        return { success: true, preferences: data.preferences };
+    }
+    catch (error) {
+        console.error("Failed to load preferences:", error);
+        return {
+            success: false,
+            error: error instanceof Error ? error.message : String(error),
+        };
     }
 });
 // Initialize preferences manager
 const preferencesManager = new preferences_1.PreferencesManager();
-mb.on('ready', () => {
-    console.log('Menubar app is ready');
+mb.on("ready", () => {
+    console.log("Menubar app is ready");
     setupIPCServer();
 });
 // Track window shown for dismissal detection
-mb.on('show', async () => {
-    console.log('Window shown');
+mb.on("show", async () => {
+    console.log("Window shown");
     await preferencesManager.recordWindowShown();
 });
 // Track window hidden and check for dismissal
-mb.on('hide', async () => {
-    console.log('Window hidden');
+mb.on("hide", async () => {
+    console.log("Window hidden");
     await preferencesManager.checkForDismissal();
 });
 // Only open dev tools in development
-if (process.env.NODE_ENV === 'development') {
-    mb.on('after-create-window', () => {
-        mb.window?.webContents.openDevTools({ mode: 'detach' });
+if (process.env.NODE_ENV === "development") {
+    mb.on("after-create-window", () => {
+        mb.window?.webContents.openDevTools({ mode: "detach" });
     });
 }
 // IPC Server for CLI communication
 let ipcServer = null;
 const getSocketPath = () => {
     const tmpDir = os.tmpdir();
-    return path.join(tmpDir, 'clauditate.sock');
+    return path.join(tmpDir, "clauditate.sock");
 };
 const setupIPCServer = () => {
     const socketPath = getSocketPath();
@@ -174,71 +206,71 @@ const setupIPCServer = () => {
         }
     }
     catch (error) {
-        console.log('Could not remove existing socket:', error);
+        console.log("Could not remove existing socket:", error);
     }
     ipcServer = net.createServer((socket) => {
-        console.log('CLI client connected');
+        console.log("CLI client connected");
         const safeWrite = (data) => {
             if (!socket.destroyed && socket.writable) {
                 try {
                     socket.write(data);
                 }
                 catch (error) {
-                    console.log('Socket write failed (client disconnected):', error instanceof Error ? error.message : String(error));
+                    console.log("Socket write failed (client disconnected):", error instanceof Error ? error.message : String(error));
                 }
             }
         };
-        socket.on('data', (data) => {
+        socket.on("data", (data) => {
             try {
                 const command = data.toString().trim();
-                console.log('Received command:', command);
+                console.log("Received command:", command);
                 switch (command) {
-                    case 'show':
+                    case "show":
                         try {
                             mb.showWindow();
-                            safeWrite('shown\n');
+                            safeWrite("shown\n");
                         }
                         catch (error) {
-                            safeWrite('error: failed to show\n');
+                            safeWrite("error: failed to show\n");
                         }
                         break;
-                    case 'hide':
+                    case "hide":
                         try {
                             mb.hideWindow();
-                            safeWrite('hidden\n');
+                            safeWrite("hidden\n");
                         }
                         catch (error) {
-                            safeWrite('error: failed to hide\n');
+                            safeWrite("error: failed to hide\n");
                         }
                         break;
-                    case 'ping':
-                        safeWrite('pong\n');
+                    case "ping":
+                        safeWrite("pong\n");
                         break;
                     default:
-                        safeWrite('error: unknown command\n');
+                        safeWrite("error: unknown command\n");
                 }
             }
             catch (error) {
-                console.error('Error processing command:', error);
-                safeWrite('error: processing failed\n');
+                console.error("Error processing command:", error);
+                safeWrite("error: processing failed\n");
             }
         });
-        socket.on('error', (error) => {
-            console.log('Socket error:', error);
+        socket.on("error", (error) => {
+            console.log("Socket error:", error);
         });
-        socket.on('close', () => {
-            console.log('CLI client disconnected');
+        socket.on("close", () => {
+            console.log("CLI client disconnected");
         });
     });
     ipcServer.listen(socketPath, () => {
-        console.log('IPC server listening on:', socketPath);
+        console.log("IPC server listening on:", socketPath);
     });
-    ipcServer.on('error', (error) => {
-        console.error('IPC server error:', error);
+    ipcServer.on("error", (error) => {
+        console.error("IPC server error:", error);
     });
 };
 // Cleanup on app quit
-electron_1.app.on('before-quit', () => {
+electron_1.app.on("before-quit", () => {
     if (ipcServer) {
         ipcServer.close();
         try {
@@ -248,7 +280,7 @@ electron_1.app.on('before-quit', () => {
             }
         }
         catch (error) {
-            console.log('Could not cleanup socket:', error);
+            console.log("Could not cleanup socket:", error);
         }
     }
 });
