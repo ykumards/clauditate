@@ -14,6 +14,8 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
     loadStats: () => electron_1.ipcRenderer.invoke('load-stats'),
     // Daily sessions persistence
     saveDailySessions: (sessions) => electron_1.ipcRenderer.invoke('save-daily-sessions', sessions),
-    loadDailySessions: () => electron_1.ipcRenderer.invoke('load-daily-sessions')
+    loadDailySessions: () => electron_1.ipcRenderer.invoke('load-daily-sessions'),
+    // App control
+    quitApp: () => electron_1.ipcRenderer.invoke('quit-app')
 });
 //# sourceMappingURL=preload.js.map

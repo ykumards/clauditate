@@ -45,6 +45,7 @@ declare class BreathingApp {
     private settingsContainer;
     private cycleRadios;
     private notificationsToggle;
+    private quitBtn;
     private insightsIcon;
     private insightsBackIcon;
     private insightsContainer;
@@ -97,5 +98,6 @@ declare class BreathingApp {
     private renderRecentSessions;
     private navigateWeek;
     private getWeekStart;
+    private quitApp;
 }
 //# sourceMappingURL=renderer.d.ts.map

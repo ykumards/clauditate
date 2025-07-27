@@ -27,6 +27,7 @@ interface ElectronAPI {
     loadStats: () => Promise<StatsData | null>;
     saveDailySessions: (sessions: DailySessions) => Promise<boolean>;
     loadDailySessions: () => Promise<DailySessions | null>;
+    quitApp: () => Promise<void>;
 }
 declare global {
     interface Window {

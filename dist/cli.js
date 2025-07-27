@@ -39,6 +39,7 @@ const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
 const net = __importStar(require("net"));
 const os = __importStar(require("os"));
+const preferences_1 = require("./preferences");
 class ClauditateCLI {
     constructor() {
         this.isRunning = false;
@@ -93,12 +94,20 @@ class ClauditateCLI {
             await this.uninstallHooks();
             return;
         }
+        if (options.updateHooks) {
+            await this.updateHooks();
+            return;
+        }
         if (options.start) {
             await this.startApp();
             return;
         }
         if (options.show) {
             await this.showApp();
+            return;
+        }
+        if (options.smartShow) {
+            await this.smartShowApp();
             return;
         }
         if (options.hide) {
@@ -114,6 +123,9 @@ class ClauditateCLI {
                 case '-s':
                     options.show = true;
                     break;
+                case '--smart-show':
+                    options.smartShow = true;
+                    break;
                 case '--hide':
                 case '-h':
                     options.hide = true;
@@ -126,6 +138,9 @@ class ClauditateCLI {
                     break;
                 case '--unhook-claude':
                     options.unhookClaude = true;
+                    break;
+                case '--update-hooks':
+                    options.updateHooks = true;
                     break;
                 case '--help':
                     options.help = true;
@@ -143,10 +158,12 @@ Usage:
 
 Commands:
   --start           Start the meditation app
-  --show, -s        Show the meditation app (for hooks)
+  --show, -s        Show the meditation app (always)
+  --smart-show      Show the meditation app (only if timing is right)
   --hide, -h        Hide the meditation app (for hooks)
   --hook-claude     Install Claude Code hooks integration
   --unhook-claude   Remove Claude Code hooks integration
+  --update-hooks    Update Claude Code hooks to latest version
   --help            Show this help
 
 Examples:
@@ -181,23 +198,37 @@ After installation, the app will automatically appear when Claude Code is thinki
             }
         }
         catch (error) {
-            // If IPC fails, app is not running - start it
-            console.log('App not running, starting...');
-            await this.startApp();
-            // Wait for app to start and try again
-            await new Promise(resolve => setTimeout(resolve, 3000));
-            try {
+            // If IPC fails, app is not running - respect user's choice to quit
+            console.log('App not running - respecting user choice to work without interruptions');
+            // Don't auto-start the app
+        }
+    }
+    async smartShowApp() {
+        try {
+            // Check if app is running first
+            const isRunning = await this.isAppRunning();
+            if (!isRunning) {
+                console.log('App not running - respecting user choice to work without interruptions');
+                return;
+            }
+            // App is running, check if we should show based on timing logic
+            const preferencesManager = new preferences_1.PreferencesManager();
+            const shouldShow = await preferencesManager.shouldShowMeditation();
+            if (shouldShow) {
                 const response = await this.sendIPCCommand('show');
                 if (response.startsWith('error')) {
-                    console.error('Show command failed after startup:', response);
+                    console.error('Smart show command failed:', response);
                 }
                 else {
-                    console.log('App shown successfully after startup');
+                    console.log('App shown based on smart timing');
                 }
             }
-            catch (retryError) {
-                console.error('Failed to show app even after startup:', retryError);
+            else {
+                console.log('Skipping show - not the right time for mindfulness');
             }
+        }
+        catch (error) {
+            console.log('Smart show failed:', error instanceof Error ? error.message : String(error));
         }
     }
     async hideApp() {
@@ -258,22 +289,23 @@ After installation, the app will automatically appear when Claude Code is thinki
                 hooks: [
                     {
                         type: "command",
-                        command: `node "${cliPath}" --show`
+                        command: `node "${cliPath}" --smart-show`
                     }
                 ]
             }
         ];
-        settings.hooks.PostToolUse = [
-            {
-                matcher: "",
-                hooks: [
-                    {
-                        type: "command",
-                        command: `node "${cliPath}" --hide`
-                    }
-                ]
-            }
-        ];
+        // Remove PostToolUse hook - we don't want to hide between tools
+        // settings.hooks.PostToolUse = [
+        //   {
+        //     matcher: "",
+        //     hooks: [
+        //       {
+        //         type: "command",
+        //         command: `node "${cliPath}" --hide`
+        //       }
+        //     ]
+        //   }
+        // ];
         settings.hooks.Stop = [
             {
                 matcher: "",
@@ -290,8 +322,18 @@ After installation, the app will automatically appear when Claude Code is thinki
         console.log('✅ Claude Code hooks installed successfully!');
         console.log('Clauditate will now appear automatically when Claude Code is thinking.');
     }
-    async uninstallHooks() {
-        console.log('Uninstalling Claude Code hooks...');
+    async updateHooks() {
+        console.log('Updating Claude Code hooks...');
+        // First uninstall existing hooks
+        await this.uninstallHooks(true); // true = silent mode
+        // Then install fresh hooks
+        await this.installHooks();
+        console.log('✅ Claude Code hooks updated successfully!');
+    }
+    async uninstallHooks(silent = false) {
+        if (!silent) {
+            console.log('Uninstalling Claude Code hooks...');
+        }
         const homeDir = process.env.HOME || process.env.USERPROFILE;
         if (!homeDir) {
             console.error('Could not determine home directory');
@@ -299,7 +341,9 @@ After installation, the app will automatically appear when Claude Code is thinki
         }
         const settingsPath = path.join(homeDir, '.claude', 'settings.json');
         if (!fs.existsSync(settingsPath)) {
-            console.log('No Claude Code settings found.');
+            if (!silent) {
+                console.log('No Claude Code settings found.');
+            }
             return;
         }
         const settingsContent = fs.readFileSync(settingsPath, 'utf8');
@@ -314,7 +358,7 @@ After installation, the app will automatically appear when Claude Code is thinki
         // Remove clauditate hooks
         if (settings.hooks) {
             delete settings.hooks.PreToolUse;
-            delete settings.hooks.PostToolUse;
+            // delete settings.hooks.PostToolUse; // Not used anymore
             delete settings.hooks.Stop;
             // If hooks object is empty, remove it
             if (Object.keys(settings.hooks).length === 0) {
@@ -322,7 +366,9 @@ After installation, the app will automatically appear when Claude Code is thinki
             }
         }
         fs.writeFileSync(settingsPath, JSON.stringify(settings, null, 2));
-        console.log('✅ Claude Code hooks uninstalled successfully!');
+        if (!silent) {
+            console.log('✅ Claude Code hooks uninstalled successfully!');
+        }
     }
 }
 // Main execution

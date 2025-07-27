@@ -113,6 +113,9 @@ electron_1.ipcMain.handle('save-daily-sessions', async (event, sessions) => {
 electron_1.ipcMain.handle('load-daily-sessions', async (event) => {
     return readJsonFile(dailySessionsPath);
 });
+electron_1.ipcMain.handle('quit-app', async (event) => {
+    electron_1.app.quit();
+});
 mb.on('ready', () => {
     console.log('Menubar app is ready');
     setupIPCServer();
@@ -142,6 +145,16 @@ const setupIPCServer = () => {
     }
     ipcServer = net.createServer((socket) => {
         console.log('CLI client connected');
+        const safeWrite = (data) => {
+            if (!socket.destroyed && socket.writable) {
+                try {
+                    socket.write(data);
+                }
+                catch (error) {
+                    console.log('Socket write failed (client disconnected):', error instanceof Error ? error.message : String(error));
+                }
+            }
+        };
         socket.on('data', (data) => {
             try {
                 const command = data.toString().trim();
@@ -150,31 +163,31 @@ const setupIPCServer = () => {
                     case 'show':
                         try {
                             mb.showWindow();
-                            socket.write('shown\n');
+                            safeWrite('shown\n');
                         }
                         catch (error) {
-                            socket.write('error: failed to show\n');
+                            safeWrite('error: failed to show\n');
                         }
                         break;
                     case 'hide':
                         try {
                             mb.hideWindow();
-                            socket.write('hidden\n');
+                            safeWrite('hidden\n');
                         }
                         catch (error) {
-                            socket.write('error: failed to hide\n');
+                            safeWrite('error: failed to hide\n');
                         }
                         break;
                     case 'ping':
-                        socket.write('pong\n');
+                        safeWrite('pong\n');
                         break;
                     default:
-                        socket.write('error: unknown command\n');
+                        safeWrite('error: unknown command\n');
                 }
             }
             catch (error) {
                 console.error('Error processing command:', error);
-                socket.write('error: processing failed\n');
+                safeWrite('error: processing failed\n');
             }
         });
         socket.on('error', (error) => {

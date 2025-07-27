@@ -35,6 +35,7 @@ class BreathingApp {
         this.settingsContainer = this.getElementById('settingsContainer');
         this.cycleRadios = document.querySelectorAll('input[name="cycles"]');
         this.notificationsToggle = this.getElementById('notificationsToggle');
+        this.quitBtn = this.getElementById('quitBtn');
         // Insights elements
         this.insightsIcon = this.getElementById('insightsIcon');
         this.insightsBackIcon = this.getElementById('insightsBackIcon');
@@ -82,6 +83,7 @@ class BreathingApp {
             radio.addEventListener('change', (e) => this.handleCycleChange(e));
         });
         this.notificationsToggle.addEventListener('change', () => this.saveSettings());
+        this.quitBtn.addEventListener('click', () => this.quitApp());
         this.completionCloseBtn.addEventListener('click', () => this.hideCompletionMessage());
     }
     selectCycles(cycles) {
@@ -488,6 +490,15 @@ class BreathingApp {
         const day = d.getDay();
         const diff = d.getDate() - day; // Sunday = 0
         return new Date(d.setDate(diff));
+    }
+    async quitApp() {
+        if (window.electronAPI) {
+            await window.electronAPI.quitApp();
+        }
+        else {
+            // Fallback for development - just close the window
+            window.close();
+        }
     }
 }
 window.addEventListener('DOMContentLoaded', () => {
