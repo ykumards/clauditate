@@ -1,0 +1,36 @@
+FROM node:18
+
+# Install system dependencies for Electron
+RUN apt-get update && apt-get install -y \
+    libgtk-3-0 \
+    libxss1 \
+    libgconf-2-4 \
+    libxrandr2 \
+    libasound2 \
+    libpangocairo-1.0-0 \
+    libatk1.0-0 \
+    libcairo-gobject2 \
+    libgtk-3-0 \
+    libgdk-pixbuf2.0-0 \
+    libxcomposite1 \
+    libxcursor1 \
+    libxdamage1 \
+    libxext6 \
+    libxfixes3 \
+    libxi6 \
+    libxrender1 \
+    libxtst6 \
+    libxss1 \
+    libnss3 \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install clauditate from npm
+RUN npm install -g clauditate@1.1.2
+
+# Create a test user (optional, for testing permissions)
+RUN useradd -m testuser
+USER testuser
+WORKDIR /home/testuser
+
+# Test commands
+CMD ["bash", "-c", "echo 'Testing Clauditate v1.1.2...' && clauditate --help && echo 'Installation successful!'"]

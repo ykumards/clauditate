@@ -26,10 +26,10 @@ npm install -g clauditate
 clauditate --hook-claude  # Set up Claude Code integration
 ```
 
-### Homebrew (macOS)
+### Homebrew (macOS) - Coming Soon
 ```bash
-brew install ykumards/clauditate/clauditate
-clauditate --hook-claude  # Set up Claude Code integration
+# Homebrew support coming soon!
+# For now, use npm installation above
 ```
 
 ### Manual Installation
