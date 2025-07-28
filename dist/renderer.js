@@ -60,6 +60,11 @@ class BreathingApp {
         this.completionMessage = this.getElementById('completionMessage');
         this.completionCloseBtn = this.getElementById('completionCloseBtn');
         this.confettiContainer = this.getElementById('confettiContainer');
+        // About elements
+        this.aboutIcon = this.getElementById('aboutIcon');
+        this.aboutContainer = this.getElementById('aboutContainer');
+        this.aboutBackIcon = this.getElementById('aboutBackIcon');
+        this.githubBtn = this.getElementById('githubBtn');
     }
     getElementById(id) {
         const element = document.getElementById(id);
@@ -101,6 +106,9 @@ class BreathingApp {
         this.notificationsToggle.addEventListener('change', () => this.saveSettings());
         this.quitBtn.addEventListener('click', () => this.quitApp());
         this.completionCloseBtn.addEventListener('click', () => this.hideCompletionMessage());
+        this.aboutIcon.addEventListener('click', () => this.showAbout());
+        this.aboutBackIcon.addEventListener('click', () => this.hideAbout());
+        this.githubBtn.addEventListener('click', () => this.openGitHub());
     }
     selectCycles(cycles) {
         this.totalCycles = cycles;
@@ -684,6 +692,24 @@ class BreathingApp {
         else {
             // Fallback for development - just close the window
             window.close();
+        }
+    }
+    showAbout() {
+        this.breatheContainer.style.display = 'none';
+        this.aboutContainer.classList.remove('hidden');
+    }
+    hideAbout() {
+        this.aboutContainer.classList.add('hidden');
+        this.breatheContainer.style.display = 'flex';
+    }
+    openGitHub() {
+        if (window.electronAPI) {
+            // Use electron's shell to open external URL
+            window.electronAPI.openExternal('https://github.com/ykumards/clauditate');
+        }
+        else {
+            // Fallback for development
+            window.open('https://github.com/ykumards/clauditate', '_blank');
         }
     }
 }

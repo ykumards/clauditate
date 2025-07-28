@@ -66,6 +66,10 @@ declare class BreathingApp {
     private completionMessage;
     private completionCloseBtn;
     private confettiContainer;
+    private aboutIcon;
+    private aboutContainer;
+    private aboutBackIcon;
+    private githubBtn;
     constructor();
     private init;
     private initElements;
@@ -112,5 +116,8 @@ declare class BreathingApp {
     private getWeekStart;
     private updateSmartStatus;
     private quitApp;
+    private showAbout;
+    private hideAbout;
+    private openGitHub;
 }
 //# sourceMappingURL=renderer.d.ts.map

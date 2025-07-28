@@ -81,6 +81,12 @@ class BreathingApp {
   private completionCloseBtn!: HTMLButtonElement;
   private confettiContainer!: HTMLElement;
 
+  // About elements
+  private aboutIcon!: HTMLElement;
+  private aboutContainer!: HTMLElement;
+  private aboutBackIcon!: HTMLElement;
+  private githubBtn!: HTMLButtonElement;
+
   constructor() {
     this.init();
   }
@@ -132,6 +138,12 @@ class BreathingApp {
     this.completionMessage = this.getElementById('completionMessage');
     this.completionCloseBtn = this.getElementById('completionCloseBtn') as HTMLButtonElement;
     this.confettiContainer = this.getElementById('confettiContainer');
+
+    // About elements
+    this.aboutIcon = this.getElementById('aboutIcon');
+    this.aboutContainer = this.getElementById('aboutContainer');
+    this.aboutBackIcon = this.getElementById('aboutBackIcon');
+    this.githubBtn = this.getElementById('githubBtn') as HTMLButtonElement;
   }
   
   private getElementById(id: string): HTMLElement {
@@ -186,6 +198,10 @@ class BreathingApp {
     this.quitBtn.addEventListener('click', () => this.quitApp());
     
     this.completionCloseBtn.addEventListener('click', () => this.hideCompletionMessage());
+    
+    this.aboutIcon.addEventListener('click', () => this.showAbout());
+    this.aboutBackIcon.addEventListener('click', () => this.hideAbout());
+    this.githubBtn.addEventListener('click', () => this.openGitHub());
   }
   
   private selectCycles(cycles: number): void {
@@ -854,6 +870,26 @@ class BreathingApp {
     } else {
       // Fallback for development - just close the window
       window.close();
+    }
+  }
+  
+  private showAbout(): void {
+    this.breatheContainer.style.display = 'none';
+    this.aboutContainer.classList.remove('hidden');
+  }
+
+  private hideAbout(): void {
+    this.aboutContainer.classList.add('hidden');
+    this.breatheContainer.style.display = 'flex';
+  }
+
+  private openGitHub(): void {
+    if (window.electronAPI) {
+      // Use electron's shell to open external URL
+      window.electronAPI.openExternal('https://github.com/ykumards/clauditate');
+    } else {
+      // Fallback for development
+      window.open('https://github.com/ykumards/clauditate', '_blank');
     }
   }
   

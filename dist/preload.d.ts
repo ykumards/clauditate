@@ -46,6 +46,7 @@ interface ElectronAPI {
         preferences?: any;
         error?: string;
     }>;
+    openExternal: (url: string) => Promise<void>;
     quitApp: () => Promise<void>;
 }
 declare global {

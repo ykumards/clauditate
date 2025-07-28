@@ -21,6 +21,8 @@ electron_1.contextBridge.exposeInMainWorld('electronAPI', {
     // Preferences
     savePreferences: (preferences) => electron_1.ipcRenderer.invoke('save-preferences', preferences),
     loadPreferences: () => electron_1.ipcRenderer.invoke('load-preferences'),
+    // External links
+    openExternal: (url) => electron_1.ipcRenderer.invoke('open-external', url),
     // App control
     quitApp: () => electron_1.ipcRenderer.invoke('quit-app')
 });

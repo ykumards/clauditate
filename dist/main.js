@@ -114,6 +114,9 @@ electron_1.ipcMain.handle("save-daily-sessions", async (event, sessions) => {
 electron_1.ipcMain.handle("load-daily-sessions", async (event) => {
     return readJsonFile(dailySessionsPath);
 });
+electron_1.ipcMain.handle("open-external", async (event, url) => {
+    await electron_1.shell.openExternal(url);
+});
 electron_1.ipcMain.handle("quit-app", async (event) => {
     electron_1.app.quit();
 });

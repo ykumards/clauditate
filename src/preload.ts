@@ -38,6 +38,7 @@ interface ElectronAPI {
   getSnoozeStatus: () => Promise<{ success: boolean; isSnooze?: boolean; error?: string }>;
   savePreferences: (preferences: any) => Promise<{ success: boolean; error?: string }>;
   loadPreferences: () => Promise<{ success: boolean; preferences?: any; error?: string }>;
+  openExternal: (url: string) => Promise<void>;
   quitApp: () => Promise<void>;
 }
 
@@ -77,6 +78,10 @@ contextBridge.exposeInMainWorld('electronAPI', {
     ipcRenderer.invoke('save-preferences', preferences),
   loadPreferences: (): Promise<{ success: boolean; preferences?: any; error?: string }> => 
     ipcRenderer.invoke('load-preferences'),
+  
+  // External links
+  openExternal: (url: string): Promise<void> => 
+    ipcRenderer.invoke('open-external', url),
   
   // App control
   quitApp: (): Promise<void> => 

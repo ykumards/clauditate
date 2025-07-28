@@ -1,6 +1,6 @@
 # Clauditate
 
-> **⚠️ Early Release v1.1.3** - Please report issues!
+> **⚠️ Early Release v1.1.4** - Please report issues!
 > 
 > A menubar meditation app that helps you stay mindful while Claude Code works
 
@@ -67,16 +67,28 @@ clauditate --update-hooks   # Update hooks to latest version
 
 ## How It Works
 
-Clauditate uses Claude Code's [hooks system](https://docs.anthropic.com/en/docs/claude-code/hooks) to:
+Clauditate uses Claude Code's [hooks system](https://docs.anthropic.com/en/docs/claude-code/hooks) with intelligent timing to create natural meditation moments:
 
+### Hook Integration
 1. **PreToolUse Hook**: Triggers when Claude starts any tool (Bash, Edit, Read, etc.)
+2. **Smart Timing Algorithm**: Decides whether to actually show the app based on your patterns
 
-The app intelligently appears when Claude begins thinking and stays visible until you manually dismiss it. This creates natural meditation moments during development, helping you:
-- Stay mindful during long Claude operations
-- Take breathing breaks during complex tasks
-- Maintain focus and reduce stress
-- Practice mindfulness without disrupting workflow
-- Control when to end meditation sessions
+### Smart Timing Algorithm
+Rather than appearing every time Claude runs a tool, Clauditate uses a thoughtful algorithm:
+
+- **Work Hours**: Only appears during your configured work hours (default 9-5)
+- **60-Minute Cliff**: Won't show within 1 hour of your last meditation session
+- **Daily Goal Tracking**: Stops appearing once you've hit your daily meditation target
+- **Dismissal Backoff**: If you dismiss it twice in 30 minutes, it waits 2 hours before trying again
+- **Probability-Based**: Uses remaining work time and goal progress to calculate when you might need a mindful moment
+
+This creates gentle, non-intrusive reminders that respect your workflow while encouraging regular mindfulness practice. The app learns your patterns and becomes less pushy as you build consistent habits.
+
+### Benefits
+- Stay mindful during long Claude operations without constant interruptions
+- Take breathing breaks during complex tasks when you actually need them
+- Maintain focus and reduce stress through natural meditation moments
+- Practice mindfulness that adapts to your workflow patterns
 
 
 ## Configuration
@@ -126,9 +138,10 @@ We welcome contributions! Please:
 
 ## ⚠️ Disclaimer
 
-**IMPORTANT**: This is an early release (v1.1.3). While we've tested it carefully:
+**IMPORTANT**: This is an early release (v1.1.4). While we've tested it carefully:
 
 - This software is provided "AS IS" without warranty of any kind
+- **Currently only tested on macOS** - Windows and Linux support is experimental
 - Use at your own risk
 - We are not responsible for any issues, interruptions, or meditation-induced enlightenment
 - **This is an independent project, not officially affiliated with Anthropic Inc. or Claude**

@@ -1,5 +1,5 @@
 import { menubar } from "menubar";
-import { app, Tray, Menu, Notification, ipcMain } from "electron";
+import { app, Tray, Menu, Notification, ipcMain, shell } from "electron";
 import * as path from "path";
 import * as fs from "fs";
 import * as net from "net";
@@ -119,6 +119,10 @@ ipcMain.handle(
 
 ipcMain.handle("load-daily-sessions", async (event) => {
   return readJsonFile<DailySessions>(dailySessionsPath);
+});
+
+ipcMain.handle("open-external", async (event, url: string) => {
+  await shell.openExternal(url);
 });
 
 ipcMain.handle("quit-app", async (event) => {
