@@ -1,10 +1,10 @@
 class Clauditate < Formula
-  desc "Mindful meditation app that integrates with Claude Code for automatic breathing breaks"
+  desc "A menubar meditation app that helps you stay mindful while Claude Code works"
   homepage "https://github.com/ykumards/clauditate"
-  url "https://github.com/ykumards/clauditate/archive/refs/tags/v1.1.0.tar.gz"
-  sha256 "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5"
+  url "https://github.com/ykumards/clauditate/archive/refs/tags/v1.2.0.tar.gz"
+  sha256 "83f7011dbf1df06cd51dbed83c1f36c40b32087857c08a1d32d87db12ff8fc15"
   license "MIT"
-  version "1.1.0"
+  version "1.2.0"
 
   depends_on "node"
 
