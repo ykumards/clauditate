@@ -1,6 +1,6 @@
 # Clauditate
 
-> **⚠️ Early Release v1.1.4** - Please report issues!
+> **⚠️ Early Release v1.2.0** - Please report issues!
 > 
 > A menubar meditation app that helps you stay mindful while Claude Code works
 
@@ -138,7 +138,7 @@ We welcome contributions! Please:
 
 ## ⚠️ Disclaimer
 
-**IMPORTANT**: This is an early release (v1.1.4). While we've tested it carefully:
+**IMPORTANT**: This is an early release (v1.2.0). While we've tested it carefully:
 
 - This software is provided "AS IS" without warranty of any kind
 - **Currently only tested on macOS** - Windows and Linux support is experimental

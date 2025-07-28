@@ -157,6 +157,11 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                     </svg>
                 </button>
+                <button class="w-9 h-9 flex items-center justify-center rounded-xl hover:bg-white/[0.06] transition-all group" id="aboutIcon">
+                    <svg class="w-[18px] h-[18px] text-white/40 group-hover:text-white/60 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </button>
             </div>
         </div>
         
@@ -219,6 +224,66 @@
                         Continue Journey
                     </button>
                 </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- About Container -->
+    <div class="fixed top-0 left-0 w-[300px] h-[480px] bg-[#0a0a0b] z-[100] flex flex-col overflow-hidden hidden" id="aboutContainer">
+        <!-- Header -->
+        <div class="flex justify-between items-center p-[15px] flex-shrink-0">
+            <h2 class="m-0 text-sm font-medium text-white/90 tracking-[-0.2px]">About</h2>
+            <button class="w-7 h-7 flex items-center justify-center text-sm cursor-pointer opacity-60 transition-all duration-200 rounded-lg bg-white/[0.04] hover:opacity-100 hover:bg-white/[0.08]" id="aboutBackIcon">
+                <svg class="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 19l-7-7 7-7"></path>
+                </svg>
+            </button>
+        </div>
+        
+        <!-- Content -->
+        <div class="flex-1 overflow-y-auto px-4 pb-4">
+            <div class="space-y-4">
+                
+                <!-- Version -->
+                <div class="text-center py-2">
+                    <div class="text-2xl mb-2">🧘‍♀️</div>
+                    <div class="text-white/90 font-medium text-sm">Clauditate</div>
+                    <div class="text-white/40 text-xs">v1.2.0</div>
+                </div>
+                
+                <!-- Description -->
+                <div class="bg-white/[0.03] rounded-xl p-3.5 border border-white/[0.05]">
+                    <p class="text-white/70 text-xs leading-relaxed">
+                        Clauditate helps you stay mindful while Claude Code works by providing gentle breathing exercises during processing moments.
+                    </p>
+                </div>
+                
+                <!-- How it works -->
+                <div class="bg-white/[0.03] rounded-xl p-3.5 border border-white/[0.05]">
+                    <h3 class="text-white/90 font-medium text-xs mb-2">Smart Timing</h3>
+                    <p class="text-white/60 text-xs leading-relaxed">
+                        Uses intelligent algorithms to appear only when you need mindful moments, respecting your workflow and building sustainable meditation habits.
+                    </p>
+                </div>
+                
+                <!-- Privacy -->
+                <div class="bg-white/[0.03] rounded-xl p-3.5 border border-white/[0.05]">
+                    <h3 class="text-white/90 font-medium text-xs mb-2">Privacy First</h3>
+                    <p class="text-white/60 text-xs leading-relaxed">
+                        All data stays local on your machine. No tracking, no analytics, just pure mindfulness.
+                    </p>
+                </div>
+                
+                <!-- GitHub -->
+                <div class="bg-white/[0.03] rounded-xl p-3.5 border border-white/[0.05]">
+                    <button class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white font-medium px-4 py-2.5 rounded-lg transition-all duration-200 text-xs" id="githubBtn">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M12 0C5.374 0 0 5.373 0 12 0 17.302 3.438 21.8 8.207 23.387c.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+                        </svg>
+                        Leave a ⭐ on GitHub
+                    </button>
+                </div>
+                
             </div>
         </div>
     </div>
